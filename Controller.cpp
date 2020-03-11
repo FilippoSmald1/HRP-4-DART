@@ -471,7 +471,6 @@ if (!(solver->supportFootHasChanged())) {
 
 	// Assemble desired tasks
 	Eigen::VectorXd desPosSwingFoot = getOmnidirectionalSwingFootTrajectoryMPC(OptFootPositioning,swingFootStartingPosition, actPosSwingFoot, stepHeight, indInitial);
-        std::cout<< "positioning " << OptFootPositioning(1) <<std::endl;
 
         if (footstepCounter == 0){desPosSwingFoot = balanceFootPos;
         desPosSwingFoot(4) = -0.15;}

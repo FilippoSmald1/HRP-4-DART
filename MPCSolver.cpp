@@ -1273,6 +1273,7 @@ void MPCSolver::genCostFunction() {
        Eigen::MatrixXd place = Eigen::MatrixXd::Zero(M,M);
        Eigen::MatrixXd position = Eigen::MatrixXd::Identity(M-1,M-1);
        Eigen::VectorXd p_m = Eigen::VectorXd::Ones(M);
+       Eigen::MatrixXd ID = Eigen::MatrixXd::Identity(M,M);
 
 
        for (int j = 0; j<M-1; j++){
@@ -1302,12 +1303,12 @@ void MPCSolver::genCostFunction() {
 
 	costFunctionH.block(0,N,N,M) = -qZ*P.transpose()*Cc;
 	costFunctionH.block(N,0,M,N) = -qZ*Cc.transpose()*P;
-	costFunctionH.block(N,N,M,M) = qZ*Cc.transpose()*Cc + Q*Idif;
+	costFunctionH.block(N,N,M,M) = qZ*Cc.transpose()*Cc + Q*ID;
 
 
 	costFunctionH.block(N+M,2*N+M,N,M) = -qZ*P.transpose()*Cc;
 	costFunctionH.block(2*N+M,N+M,M,N) = -qZ*Cc.transpose()*P;
-	costFunctionH.block(2*N+M,2*N+M,M,M) = qZ*Cc.transpose()*Cc + Q*Idif;
+	costFunctionH.block(2*N+M,2*N+M,M,M) = qZ*Cc.transpose()*Cc + Q*ID;
 
 	Eigen::VectorXd vArcX = Eigen::VectorXd::Zero(N);
 	Eigen::VectorXd vArcY = Eigen::VectorXd::Zero(N);
@@ -1326,10 +1327,20 @@ void MPCSolver::genCostFunction() {
     costFunctionF1.block(0,0,N,1) = (qVx*Vu.transpose())*((Vs*stateX)-vArcX) + qZ*P.transpose()*p*zmpPos(0);
     costFunctionF2.block(0,0,N,1) = (qVy*Vu.transpose())*((Vs*stateY)-vArcY) + qZ*P.transpose()*p*zmpPos(1);
 
-    costFunctionF1.block(N,0,M,1) = -qZ*Cc.transpose()*p*zmpPos(0) - Q*vRefX*(0.5+0*singleSupportDuration+0*doubleSupportDuration)*Idif.transpose()*p_m;
-    costFunctionF2.block(N,0,M,1) = -qZ*Cc.transpose()*p*zmpPos(1) - Q*vRefY*(0.5+0*singleSupportDuration+0*doubleSupportDuration)*Idif.transpose()*p_m;
+    for (int h = 0; h<M; h++){
+         ID(h,h) = (h+1)*vRefX*(singleSupportDuration+doubleSupportDuration);
+    } 
 
-   std::cout << Q*vRefY*(0.5+0*singleSupportDuration+0*doubleSupportDuration)*Idif.transpose()*p_m<<std::endl;
+    costFunctionF1.block(N,0,M,1) = -qZ*Cc.transpose()*p*zmpPos(0) - Q*ID*p_m;
+
+
+    for (int h = 0; h<M; h++){
+         ID(h,h) = (h+1)*vRefY*(singleSupportDuration+doubleSupportDuration);
+    } 
+ 
+    costFunctionF2.block(N,0,M,1) = -qZ*Cc.transpose()*p*zmpPos(1) - Q*ID*p_m;
+
+
  
 
     costFunctionF<<costFunctionF1,costFunctionF2;
