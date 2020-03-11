@@ -99,7 +99,7 @@ namespace mpcSolver{
         double vRefX=0;
         double vRefY=0;
         double omegaRef=0;
-        int mpcIter,controlIter;
+        int mpcIter,controlIter, adaptTime;
         bool adaptSim;
 
         // useful matrices

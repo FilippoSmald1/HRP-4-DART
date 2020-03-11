@@ -79,7 +79,7 @@ Controller::Controller(dart::dynamics::SkeletonPtr _robot,
         stepHeight = 0.022;
 	singleSupportDuration = 0.3;
 	doubleSupportDuration = 0.2;
-        bool activateTimingAdaptation = true;
+        bool activateTimingAdaptation = false;
 
         // The following choice strongly simplifies the gait generation algorithm
         double prediction_horizon = 2*(singleSupportDuration+doubleSupportDuration);
@@ -267,9 +267,9 @@ void Controller::update()
 	}
 
 	qDotOld = qDot;
-        storeData();
+        //storeData();
         ArmSwing();
-        AnkleRegulation();
+        AnkleRegulation(); 
 } 
 
 void Controller::storeData() {
@@ -397,7 +397,7 @@ Eigen::VectorXd Controller::generateWalking(){
 
 
 
-        bool widj_ref = false;
+        bool widj_ref = true;
 
         double vx, vy, vth;
 
@@ -429,7 +429,7 @@ Eigen::VectorXd Controller::generateWalking(){
         }else{
         vx = 0.1;  //0.2
         vy = 0.0;
-        vth = 0.05;
+        vth = 0.00;
         }
 
         }
@@ -471,8 +471,7 @@ if (!(solver->supportFootHasChanged())) {
 
 	// Assemble desired tasks
 	Eigen::VectorXd desPosSwingFoot = getOmnidirectionalSwingFootTrajectoryMPC(OptFootPositioning,swingFootStartingPosition, actPosSwingFoot, stepHeight, indInitial);
-
-
+        std::cout<< "positioning " << OptFootPositioning(1) <<std::endl;
 
         if (footstepCounter == 0){desPosSwingFoot = balanceFootPos;
         desPosSwingFoot(4) = -0.15;}
@@ -1152,9 +1151,9 @@ mRobot->setPosition(mRobot->getDof("L_SHOULDER_P")->getIndexInSkeleton(), (4-5*s
 void Controller::AnkleRegulation() {
 
 Eigen::Vector3d GYRO = mTorso->getAngularVelocity() ;
-std::cout<<"angvel " <<GYRO<<std::endl;
+
 double K_pitch = 0.3*(3.14/180.0);
-double K_roll= 0.3*(3.14/180.0);
+double K_roll= 0.1*(3.14/180.0);
 
 // right ankle pitch
 mRobot->setPosition(mRobot->getDof("R_ANKLE_P")->getIndexInSkeleton(), (mRobot->getPosition(mRobot->getDof("R_ANKLE_P")->getIndexInSkeleton()))-K_pitch*GYRO(1));

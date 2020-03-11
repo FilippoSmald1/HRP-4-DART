@@ -168,7 +168,8 @@ MPCSolver::MPCSolver(double mpcTimeStep, double controlTimeStep, double predicti
     footstepsOptimalY = Eigen::VectorXd::Zero(M);
 
 
-    adaptSim = true;
+    adaptSim = false;
+    adaptTime = 0;
     
 }
 
@@ -373,7 +374,7 @@ if (footstepCounter == 12 && controlIter > 1 && controlIter <= 10 ){ //14
     // Stack the matrices for the constraints
     // If both feet are on the floor also add the swing foot constraint
 
-    if (true) { //(footstepCounter == 0 || mpcIter >= 0)
+    if (false) { //(footstepCounter == 0 || mpcIter >= 0)
     	int nConstraints = Aeq.rows() + AFootsteps.rows() + AZmp.rows() + ASwingFoot.rows();
         genSwingFootConstraint(swingFootTransform);
     	AConstraint.resize(nConstraints, 2*(N+M));
@@ -421,8 +422,14 @@ if (footstepCounter == 12 && controlIter > 1 && controlIter <= 10 ){ //14
 
     ++controlIter;
 
+   
 
-    mpcIter = floor(controlIter*controlTimeStep/mpcTimeStep);
+
+    if (footstepCounter == 5 && false){ adaptTime = 3;
+    std::cout<<"adaptTime"<<std::endl;
+    }
+
+    mpcIter = floor(controlIter*controlTimeStep/mpcTimeStep) + adaptTime;
 
 
   // Timing manager update
@@ -480,6 +487,7 @@ if(activate_timing_adaptation){
         trig_x = true;
     	controlIter = 0;
     	mpcIter = 0;
+        adaptTime = 0;
         footstepCounter++;
         std::cout << "Iteration " << controlIter << " Footstep " << footstepCounter << std::endl;
     }
@@ -503,10 +511,16 @@ void MPCSolver::changeReferenceFrame(Eigen::Affine3d swingFootTransform) {
 
 	// apply rotation before translation because this transform
 	// is expressed in the new support foot frame
+
 /*
 	comPos = swingFootTransform.rotation()*comPos;
 	comVel = swingFootTransform.rotation()*comVel;
 	zmpPos = swingFootTransform.rotation()*zmpPos;
+
+        comPos(0)-= -swingFootPos(0);
+	comPos(1)-= -swingFootPos(1);
+	zmpPos(0)-= -swingFootPos(0);
+	zmpPos(1)-= -swingFootPos(1);
 
 /**/
 
@@ -515,7 +529,7 @@ void MPCSolver::changeReferenceFrame(Eigen::Affine3d swingFootTransform) {
 	comPos(1)-= +predictedFootstep(1);
 	zmpPos(0)-= +predictedFootstep(0);
 	zmpPos(1)-= +predictedFootstep(1);
-
+/**/
 /*	comPos(0)-= -swingFootPos(0);
 	comPos(1)-= -swingFootPos(1);
 	zmpPos(0)-= -swingFootPos(0);
@@ -1179,6 +1193,46 @@ if(activate_timing_adaptation){
 	Cc.block(S+D-mpcIter+((M-1)*(S+D)),M-1,mpcIter,1) = Ccf.block(0,0,mpcIter,1);
 
 
+
+/*
+
+    // Matrices for double support
+    
+    Eigen::VectorXd fullCc_Step_ones = Eigen::VectorXd::Ones(S);
+    Eigen::VectorXd fullCc_Next_zero = Eigen::VectorXd::Zero(S);
+    Eigen::VectorXd fullCc_Step = Eigen::VectorXd::Zero(S+D);
+    Eigen::VectorXd fullCc_NextStep = Eigen::VectorXd::Zero(S+D); 
+    Eigen::VectorXd StepTransition_1 = Eigen::VectorXd::Ones(D);
+    Eigen::VectorXd StepTransition_2 = Eigen::VectorXd::Ones(D);
+    Eigen::VectorXd F_zero = Eigen::VectorXd::Zero(S+D);
+    Eigen::MatrixXd FullCc = Eigen::MatrixXd::Zero(S+D + S+D + (S+D), M);
+        
+        for (double k=0; k<D; k++){ 
+        StepTransition_1(k) = 1 - (k+1)/(D+1);
+	StepTransition_2(k) = (k+1)/(D+1);
+        }
+
+     fullCc_Step << fullCc_Step_ones, StepTransition_1;
+     fullCc_NextStep << fullCc_Next_zero, StepTransition_2;
+
+     FullCc.block(0,0,S+D,1) = fullCc_NextStep;
+     FullCc.block(0,1,S+D,1) = F_zero;   
+     FullCc.block(S+D,0,S+D,1) = fullCc_Step;  
+     FullCc.block(S+D,1,S+D,1) = fullCc_NextStep;  
+     FullCc.block(S+D+(S+D),0,S+D,1) = F_zero;   
+     FullCc.block(S+D+(S+D),1,S+D,1) = fullCc_Step;   
+
+
+        if (footstepCounter>1){
+        Ic = Eigen::MatrixXd::Identity(N, N);
+        }
+        Cc << FullCc.block(mpcIter,0,N,M);
+
+
+///////////////    /**/
+
+
+
 	rCosZmp.block(0,0,S+D-mpcIter,S+D-mpcIter) = Eigen::MatrixXd::Identity(S+D-mpcIter,S+D-mpcIter);
 	rSinZmp.block(0,0,S+D-mpcIter,S+D-mpcIter) = Eigen::MatrixXd::Zero(S+D-mpcIter,S+D-mpcIter);
 
@@ -1215,33 +1269,45 @@ void MPCSolver::genCostFunction() {
 	Cc.block(S+D-mpcIter+((M-1)*(S+D)),M-1,mpcIter,1) = Ccf.block(0,0,mpcIter,1);
 /**/
 
+       Eigen::MatrixXd Idif = Eigen::MatrixXd::Zero(M,M);
+       Eigen::MatrixXd place = Eigen::MatrixXd::Zero(M,M);
+       Eigen::MatrixXd position = Eigen::MatrixXd::Identity(M-1,M-1);
+       Eigen::VectorXd p_m = Eigen::VectorXd::Ones(M);
+
+
+       for (int j = 0; j<M-1; j++){
+           place(1+j,j) = position(j,j);
+       }
+
+       Idif = Eigen::MatrixXd::Identity(2,2) - place;
+       Idif = Idif.transpose()*Idif;
+
+
         if (widgetReference==false) {
             vRefX = v_x;
             vRefY = v_y;
             omegaRef = v_th;
         }
 
-        qZd = 1;
-        qZ = 0*1000;
-        qVx = 0*10000;
-        qVy = 0*10000;
+        qZd = 0.001;
+        double Q = 1000000.0;
+
+        qZ = 0;
+        qVx = 0;
+        qVy = 0;
 
 	costFunctionH.block(0,0,N,N) = qZd*Eigen::MatrixXd::Identity(N,N) + qVx*Vu.transpose()*Vu + qZ*P.transpose()*P;
 	costFunctionH.block(N+M,N+M,N,N) = qZd*Eigen::MatrixXd::Identity(N,N) + qVy*Vu.transpose()*Vu + qZ*P.transpose()*P;
 
 
 	costFunctionH.block(0,N,N,M) = -qZ*P.transpose()*Cc;
-
-
 	costFunctionH.block(N,0,M,N) = -qZ*Cc.transpose()*P;
-
-
-	costFunctionH.block(N,N,M,M) = qZ*Cc.transpose()*Cc;
+	costFunctionH.block(N,N,M,M) = qZ*Cc.transpose()*Cc + Q*Idif;
 
 
 	costFunctionH.block(N+M,2*N+M,N,M) = -qZ*P.transpose()*Cc;
 	costFunctionH.block(2*N+M,N+M,M,N) = -qZ*Cc.transpose()*P;
-	costFunctionH.block(2*N+M,2*N+M,M,M) = qZ*Cc.transpose()*Cc;
+	costFunctionH.block(2*N+M,2*N+M,M,M) = qZ*Cc.transpose()*Cc + Q*Idif;
 
 	Eigen::VectorXd vArcX = Eigen::VectorXd::Zero(N);
 	Eigen::VectorXd vArcY = Eigen::VectorXd::Zero(N);
@@ -1260,8 +1326,11 @@ void MPCSolver::genCostFunction() {
     costFunctionF1.block(0,0,N,1) = (qVx*Vu.transpose())*((Vs*stateX)-vArcX) + qZ*P.transpose()*p*zmpPos(0);
     costFunctionF2.block(0,0,N,1) = (qVy*Vu.transpose())*((Vs*stateY)-vArcY) + qZ*P.transpose()*p*zmpPos(1);
 
-    costFunctionF1.block(N,0,M,1) = -qZ*Cc.transpose()*p*zmpPos(0);
-    costFunctionF2.block(N,0,M,1) = -qZ*Cc.transpose()*p*zmpPos(1);
+    costFunctionF1.block(N,0,M,1) = -qZ*Cc.transpose()*p*zmpPos(0) - Q*vRefX*(0.5+0*singleSupportDuration+0*doubleSupportDuration)*Idif.transpose()*p_m;
+    costFunctionF2.block(N,0,M,1) = -qZ*Cc.transpose()*p*zmpPos(1) - Q*vRefY*(0.5+0*singleSupportDuration+0*doubleSupportDuration)*Idif.transpose()*p_m;
+
+   std::cout << Q*vRefY*(0.5+0*singleSupportDuration+0*doubleSupportDuration)*Idif.transpose()*p_m<<std::endl;
+ 
 
     costFunctionF<<costFunctionF1,costFunctionF2;
 }
@@ -1365,6 +1434,8 @@ void MPCSolver::computeOrientations() {
 }
 
 void MPCSolver::genBalanceConstraint(){
+
+
 
 	AZmp.setZero();
 
