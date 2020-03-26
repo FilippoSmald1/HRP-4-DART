@@ -232,7 +232,7 @@ if (widgetReference==false) {
 
     int sim_0 = 1; 
 
-    if (sim_0 == 1 && false){
+    if (sim_0 == 1 && false ){
 
     if (footstepCounter == 7 && controlIter > 1 && controlIter <= 10 ){ 
         
@@ -524,6 +524,9 @@ void MPCSolver::changeReferenceFrame(Eigen::Affine3d swingFootTransform) {
 
 /**/
 
+	comPos = swingFootTransform.rotation()*comPos;
+	comVel = swingFootTransform.rotation()*comVel;
+	zmpPos = swingFootTransform.rotation()*zmpPos;
 
 	comPos(0)-= +predictedFootstep(0);
 	comPos(1)-= +predictedFootstep(1);
@@ -1292,6 +1295,8 @@ void MPCSolver::genCostFunction() {
 
         qZd = 0.001;
         double Q = 1000000.0;
+        qZd = 1;
+        Q = 100;
 
         qZ = 0;
         qVx = 0;
@@ -1308,7 +1313,7 @@ void MPCSolver::genCostFunction() {
 
 	costFunctionH.block(N+M,2*N+M,N,M) = -qZ*P.transpose()*Cc;
 	costFunctionH.block(2*N+M,N+M,M,N) = -qZ*Cc.transpose()*P;
-	costFunctionH.block(2*N+M,2*N+M,M,M) = qZ*Cc.transpose()*Cc + Q*ID;
+	costFunctionH.block(2*N+M,2*N+M,M,M) = qZ*Cc.transpose()*Cc + 10*Q*ID;
 
 	Eigen::VectorXd vArcX = Eigen::VectorXd::Zero(N);
 	Eigen::VectorXd vArcY = Eigen::VectorXd::Zero(N);
@@ -1338,7 +1343,7 @@ void MPCSolver::genCostFunction() {
          ID(h,h) = (h+1)*vRefY*(singleSupportDuration+doubleSupportDuration);
     } 
  
-    costFunctionF2.block(N,0,M,1) = -qZ*Cc.transpose()*p*zmpPos(1) - Q*ID*p_m;
+    costFunctionF2.block(N,0,M,1) = -qZ*Cc.transpose()*p*zmpPos(1) - 10*Q*ID*p_m;
 
 
  

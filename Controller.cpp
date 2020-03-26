@@ -10,7 +10,7 @@ using namespace dart::simulation;
 
 double body_angles[] = {0,0,0};
 double startWalk = 0;
-int sim0 = 2;
+int sim0 = 1;
 
 Controller::Controller(dart::dynamics::SkeletonPtr _robot,
 		dart::simulation::WorldPtr _world)
@@ -97,8 +97,11 @@ Controller::~Controller()
  
 void Controller::update()
 { 
-
-
+/*
+       if(mWorld->getSimFrames()>600 && mWorld->getSimFrames()<620){ 
+        mSwingFoot->addExtForce(Eigen::Vector3d(50, 50, 0));
+        std::cout << "Push" << std::endl;
+}/**/
 
         if(sim0 == 2 && footstepCounter== 6 ){ 
         //std::cout << "Sim Frames " << mWorld->getSimFrames() << std::endl;
@@ -267,9 +270,11 @@ void Controller::update()
 	}
 
 	qDotOld = qDot;
-        //storeData();
+        storeData();
         ArmSwing();
         AnkleRegulation(); 
+
+
 } 
 
 void Controller::storeData() {
@@ -290,6 +295,10 @@ void Controller::storeData() {
         Eigen::VectorXd ZMPPOS = Eigen::VectorXd::Zero(3);
         ZMPPOS = solver->getOptimalZMPPosition();
 
+        
+        Eigen::VectorXd ZMPPOS_meas_cop =  Eigen::VectorXd::Zero(3);
+        ZMPPOS_meas_cop = getZmpFromExternalForces();
+
 
         ofstream myfile;
 
@@ -299,6 +308,33 @@ void Controller::storeData() {
         myfile.open ("./Data/y_RF.txt",ios::app);
         myfile << mSupportFoot->getCOM()(1) <<endl; 
         myfile.close();
+        myfile.open ("./Data/x_m.txt",ios::app);
+        myfile << COMPOS_meas(0) <<endl; 
+        myfile.close();
+        myfile.open ("./Data/y_m.txt",ios::app);
+        myfile << COMPOS_meas(1) <<endl; 
+        myfile.close();
+        myfile.open ("./Data/xz_m_cop.txt",ios::app);
+        myfile << ZMPPOS_meas_cop(0) <<endl; 
+        myfile.close();
+        myfile.open ("./Data/yz_m_cop.txt",ios::app);
+        myfile << ZMPPOS_meas_cop(1) <<endl; 
+        myfile.close();
+        myfile.open ("./Data/x.txt",ios::app);
+        myfile << COMPOS(0) <<endl; 
+        myfile.close();
+        myfile.open ("./Data/y.txt",ios::app);
+        myfile << COMPOS(1) <<endl; 
+        myfile.close();
+        myfile.open ("./Data/xz.txt",ios::app);
+        myfile << ZMPPOS(0) <<endl; 
+        myfile.close();
+        myfile.open ("./Data/yz.txt",ios::app);
+        myfile << ZMPPOS(1) <<endl; 
+        myfile.close();
+
+
+/*
         myfile.open ("./Data/x.txt",ios::app);
         myfile << COMPOS(0) <<endl; 
         myfile.close();
@@ -348,6 +384,8 @@ void Controller::storeData() {
         myfile.open ("./Data/y_um.txt",ios::app);
         myfile << mTorso->getCOM(mSupportFoot)(1)+COMVEL_meas(1)/3.41739249 <<endl;
         myfile.close();
+
+/**/
 }
 
 Eigen::VectorXd Controller::generateWalking(){
@@ -847,7 +885,7 @@ Eigen::Vector3d Controller::getZmpFromExternalForces()
 
 
 
-	if(abs(left_foot->getConstraintImpulse()[5])>0.01){
+	if(abs(left_foot->getConstraintImpulse()[5])>0.00){
 		left_cop << -(left_foot)->getConstraintImpulse()(1)/(left_foot)->getConstraintImpulse()(5)  ,  (left_foot)->getConstraintImpulse()(0)/(left_foot)->getConstraintImpulse()(5),0.0;
 		Eigen::Matrix3d iRotation = left_foot->getWorldTransform().rotation();
 		Eigen::Vector3d iTransl   = left_foot->getWorldTransform().translation();
@@ -863,7 +901,7 @@ Eigen::Vector3d Controller::getZmpFromExternalForces()
 	right_torque = right_foot->getWorldTransform().rotation()*right_torque;
 
 
-	if(abs(right_foot->getConstraintImpulse()[5])>0.01){
+	if(abs(right_foot->getConstraintImpulse()[5])>0.00){
 		right_cop << -(right_foot)->getConstraintImpulse()(1)/(right_foot)->getConstraintImpulse()(5),(right_foot)->getConstraintImpulse()(0)/(right_foot)->getConstraintImpulse()(5),0.0;
 		Eigen::Matrix3d iRotation = right_foot->getWorldTransform().rotation();
 		Eigen::Vector3d iTransl   = right_foot->getWorldTransform().translation();
@@ -885,14 +923,14 @@ Eigen::Vector3d Controller::getZmpFromExternalForces()
 		zmp_v.push_back(0.0);
 	}else{
 		// No contact detected
-		zmp_v.push_back(0.0);
-		zmp_v.push_back(0.0);
+		zmp_v.push_back((mSupportFoot->getCOM()(0)));
+		zmp_v.push_back((mSupportFoot->getCOM()(1)));
 		zmp_v.push_back(0.0);
 	}
 
-        std::cout << "right_foot->getConstraintImpulse() "<< right_foot->getConstraintImpulse() <<std::endl;
-        std::cout << "left_foot->getConstraintImpulse() "<< right_foot->getConstraintImpulse() <<std::endl;
-
+        //std::cout << "right_foot->getConstraintImpulse() "<< right_foot->getConstraintImpulse() <<std::endl;
+        //std::cout << "left_foot->getConstraintImpulse() "<< left_foot->getConstraintImpulse() <<std::endl;
+ 
 	Eigen::Vector3d returnZmp;
 	returnZmp << zmp_v[0], zmp_v[1], zmp_v[2];
 
@@ -1100,8 +1138,8 @@ std::cout <<"CHEST_Y " << mRobot->getDof("CHEST_Y")->getIndexInSkeleton()<< std:
   q[0] = 0.0;
   q[1] = 4*M_PI/180;
   q[2] = 0.0;
-  q[3] = -1.0;
-  q[4] = -0.5;
+  q[3] = 0.0;
+  q[4] = -0.0;
   q[5] = 0.753;
 
 // Right Leg
@@ -1128,14 +1166,14 @@ mRobot->setPosition(mRobot->getDof("R_SHOULDER_R")->getIndexInSkeleton(), -8*M_P
 mRobot->setPosition(mRobot->getDof("R_SHOULDER_Y")->getIndexInSkeleton(), 0 );
 
 mRobot->setPosition(mRobot->getDof("R_ELBOW_P")->getIndexInSkeleton(), -25*M_PI/180 );
+mRobot->setPosition(mRobot->getDof("R_ELBOW_P")->getIndexInSkeleton(), -25*M_PI/180 );
 
 mRobot->setPosition(mRobot->getDof("L_SHOULDER_P")->getIndexInSkeleton(), (4)*M_PI/180  );
 mRobot->setPosition(mRobot->getDof("L_SHOULDER_R")->getIndexInSkeleton(), 8*M_PI/180  );
 mRobot->setPosition(mRobot->getDof("L_SHOULDER_Y")->getIndexInSkeleton(), 0 );
 
 mRobot->setPosition(mRobot->getDof("L_ELBOW_P")->getIndexInSkeleton(), -25*M_PI/180 ); 
-
-
+mRobot->setPosition(mRobot->getDof("L_ELBOW_P")->getIndexInSkeleton(), -25*M_PI/180 ); 
 }
 
 void Controller::ArmSwing() {
@@ -1151,8 +1189,8 @@ void Controller::AnkleRegulation() {
 
 Eigen::Vector3d GYRO = mTorso->getAngularVelocity() ;
 
-double K_pitch = 0.3*(3.14/180.0);
-double K_roll= 0.1*(3.14/180.0);
+double K_pitch = 0.3*(3.14/180.0);  //0.3*(3.14/180.0)
+double K_roll= 0.1*(3.14/180.0);    //0.1*(3.14/180.0)
 
 // right ankle pitch
 mRobot->setPosition(mRobot->getDof("R_ANKLE_P")->getIndexInSkeleton(), (mRobot->getPosition(mRobot->getDof("R_ANKLE_P")->getIndexInSkeleton()))-K_pitch*GYRO(1));

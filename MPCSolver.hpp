@@ -57,6 +57,8 @@ namespace mpcSolver{
 
         Eigen::MatrixXd Timing_Manager;
 
+        double omega;
+
 	private:
 
         // Constant parameters
@@ -70,7 +72,7 @@ namespace mpcSolver{
         double mpcTimeStep;
         double controlTimeStep;
         double comTargetHeight;
-        double omega;
+
         double measuredComWeight_x = 0.0;
         double measuredComWeight_y = 0.0;
         double measuredZmpWeight = 0;
