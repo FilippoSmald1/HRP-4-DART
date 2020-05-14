@@ -2,7 +2,7 @@
 HRP-4 DART simulation
 
 
-Dynamic simulation of the position controlled HRP-4 robot performing a dynamic walk. The gait generation algorithm is designed to perform automatic footstep placement and timing adaptation to allow a strong degree of robustness. The code is offered for benchmarking, review, education or as a simple example of simulation on Dart. Please contact the authors for any question.
+Dynamic simulation of the position controlled HRP-4 robot performing a dynamic walk. The gait generation algorithm is designed to perform automatic footstep placement. The code is offered for benchmarking, review, education or as a simple example of simulation on Dart. Please contact the authors for any question.
 
 DART REMARKS
 
@@ -13,13 +13,36 @@ Please install Dart (Dynamic Animation and Robotics Toolkit) https://dartsim.git
          git checkout tags/v6.6.1 
 
 to not checkout the latest tag of DART 6, otherwise you may have issues in running the code. The problem is only related to Dart, so if you are already practiced with it, feel free to use any version.
-ATTENTION: the of HRP-4 urdf file must be modified in the "main.cpp" and the Eigen directory should be decompressed if you need it. 
+
+Clone the repository. Type from terminal:
+
+     git clone https://github.com/FilippoSmald1/HRP-4-DART.git
+
+Decompress the the "Eigen.zip" and "qpOases.zip" folders.
+
+Open "main.cpp" and change the path 
+
+    auto ground = urdfLoader.parseSkeleton(
+	"your current directory absolute path /urdf/ground.urdf");
+    auto hrp4 = urdfLoader.parseSkeleton(
+        "your current directory absolute path /urdf/hrp4.urdf"); 
+        
+
+Then type from terminal 
+    
+       mkdir build && cd build
+       cmake .. && make
+       
+And eventually launch the simulation:
+
+       ./Hrp4
+       
 
 SIMULATION REMARKS
 
 The core component of the code are the Controller and the MPC solver. The MPC solver provides a CoM trajectory, expressed w.r.t. the support foot, to be kinematically tracked by the Controller, which is also responsible of the swing foot trajectory generation, the measurement collection and some further tools (data storage, external pushes management, etc.). Inverse Kinematic is addressed with a simple weighted pseudo inverse method. Jacobians are kindly provided by Dart.
 
-The MPC gait generation is the peculiar part of the simulation. The simulation implements the IS-MPC (Intrinsically Stable MPC for humanoid gait generation developed at Diag Robotics Lab). IS-MPC is characterized by a wide set of interesting properties such as a mathematically demonstrable internal stability (no CoM divergence w.r.t. the ZMP).Moreover, the so called "feasibility driven timing adaptation" is also part of the code and can be activated. The following papers are suggested for further details
+The MPC gait generation is the peculiar part of the simulation. The simulation implements the IS-MPC (Intrinsically Stable MPC for humanoid gait generation developed at Diag Robotics Lab). 
 
     N. Scianca, M. Cognetti, D. De Simone, L. Lanari and G. Oriolo, "Intrinsically stable MPC for humanoid gait generation," 2016 IEEE-RAS 16th International Conference on Humanoid Robots (Humanoids), Cancun, 2016, pp. 601-606;
 
