@@ -14,7 +14,7 @@ NaoWidget::NaoWidget(
     mWorld(world),
     mGuiVelGain(10),
     mGuiZmpGain(10),
-    mGuiComHeight(0.85),
+    mGuiComHeight(0.84),
     mGuiReferenceVelocityX(0.0),
     mGuiReferenceVelocityY(0.0),
     mGuiReferenceVelocityOmega(0.0),

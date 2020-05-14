@@ -12,33 +12,33 @@
 
 int main(int argc, char* argv[])
 {
-  // Create a world
+  // Create a world  
   dart::simulation::WorldPtr world(new dart::simulation::World);
 
   // Load ground and Nao robot and add them to the world
   dart::utils::DartLoader urdfLoader;
-  auto ground = urdfLoader.parseSkeleton(//"dart://sample/sdf/atlas/ground.urdf");
-	"/home/filippo/DART codes/HRP-4 IS-MPC/urdf/ground.urdf");
-  auto nao = urdfLoader.parseSkeleton(//dart::utils::SdfParser::readSkeleton(
-        "/home/filippo/DART codes/HRP-4 IS-MPC/urdf/hrp4.urdf"); 
+  auto ground = urdfLoader.parseSkeleton(
+	"/home/filippo/DART codes/HRP-4 IS-MPC Basic/urdf/ground.urdf");
+  auto hrp4 = urdfLoader.parseSkeleton(
+        "/home/filippo/DART codes/HRP-4 IS-MPC Basic/urdf/hrp4.urdf"); 
   world->addSkeleton(ground);
-  world->addSkeleton(nao);
+  world->addSkeleton(hrp4);
 
   // set joint actuator type
   std::vector<size_t> indices;
   std::vector<dart::dynamics::Joint::ActuatorType> types;
   double sufficient_force = 100;// 20;
 
-  for (size_t i = 0; i < nao->getNumJoints(); i++) {
-	  size_t  dim   = nao->getJoint(i)->getNumDofs();
+  for (size_t i = 0; i < hrp4->getNumJoints(); i++) {
+	  size_t  dim   = hrp4->getJoint(i)->getNumDofs();
 	  if(dim==6){
-		  nao->getJoint(i)->setActuatorType(dart::dynamics::Joint::PASSIVE);
+		  hrp4->getJoint(i)->setActuatorType(dart::dynamics::Joint::PASSIVE);
 	  }
 	  if(dim==1){
-		  nao->getJoint(i)->setActuatorType(dart::dynamics::Joint::SERVO);
-		  nao->getJoint(i)->setForceUpperLimit(0, sufficient_force);
-		  nao->getJoint(i)->setForceLowerLimit(0, -sufficient_force);
-		  nao->getJoint(i)->setPositionLimitEnforced(true);
+		  hrp4->getJoint(i)->setActuatorType(dart::dynamics::Joint::SERVO);
+		  hrp4->getJoint(i)->setForceUpperLimit(0, sufficient_force);
+		  hrp4->getJoint(i)->setForceLowerLimit(0, -sufficient_force);
+		  hrp4->getJoint(i)->setPositionLimitEnforced(true);
 	  }
   }
 
@@ -50,7 +50,7 @@ int main(int argc, char* argv[])
 
   // Wrap a WorldNode around it
   osg::ref_ptr<NaoWorldNode> node
-      = new NaoWorldNode(world, nao);
+      = new NaoWorldNode(world, hrp4);
   node->setNumStepsPerCycle(1);
 
   // Create a Viewer and set it up with the WorldNode

@@ -97,158 +97,7 @@ Controller::~Controller()
  
 void Controller::update()
 { 
-/*
-       if(mWorld->getSimFrames()>600 && mWorld->getSimFrames()<620){ 
-        mSwingFoot->addExtForce(Eigen::Vector3d(50, 50, 0));
-        std::cout << "Push" << std::endl;
-}/**/
 
-        if(sim0 == 2 && footstepCounter== 6 ){ 
-        //std::cout << "Sim Frames " << mWorld->getSimFrames() << std::endl;
-        mSwingFoot->addExtForce(solver->push);
-
-/*
-        auto visualShapeNodes = mSwingFoot->getShapeNodesWith<VisualAspect>();
-
-        if(visualShapeNodes.size() == 2u)
-        {
-        //assert(visualShapeNodes[2]->getShape() == mArrow);
-        visualShapeNodes[1]->remove();
-        }
-        if(visualShapeNodes.size() == 3u)
-        {
-        //assert(visualShapeNodes[2]->getShape() == mArrow);
-        visualShapeNodes[2]->remove();
-        }
-/**/
-        
-
-        if(solver->push(0) != 0.0 || solver->push(1) != 0.0){
-        tail_counter = 30;
-        }
-
-        if (solver->push(0) != 0.0){
-        std::shared_ptr<ArrowShape> mArrow;
-
-        ArrowShape::Properties arrow_properties;
-        arrow_properties.mRadius = 0.05;
-        Eigen::Vector3d tail_offset = Eigen::Vector3d(0.0, 0.0, 0.0);
-        if(solver->push(0) > 0) tail_offset(0) = 0.65;
-        if(solver->push(0) < 0) tail_offset(0) = -0.65;
-        if(solver->push(1) > 0) tail_offset(1) = 0.65;
-        if(solver->push(1) < 0) tail_offset(1) = -0.65;
-
-        Eigen::Vector3d tail_pos = Eigen::Vector3d(-0.1, 0.0, 0.15) ;
-        if(solver->push(0) < 0) tail_pos = Eigen::Vector3d(0.1, 0.0, 0.15) ;
-        if(solver->push(1) < 0) tail_pos = Eigen::Vector3d(0.1, +0.1, 0.15) ;
-        if(solver->push(1) > 0) tail_pos = Eigen::Vector3d(0.1, -0.1, 0.15) ;
-
-        Eigen::Vector3d head_pos = tail_pos - tail_offset;
-
-        mArrow = std::shared_ptr<ArrowShape>(new ArrowShape(
-             Eigen::Vector3d(0.0, 0.0, 0.0),
-             Eigen::Vector3d(0.2, 0.05, 0.05),
-             arrow_properties, dart::Color::Red(1.0)));
-        mArrow->setPositions(
-            head_pos,
-            tail_pos);
-      
-        mSwingFoot->createShapeNodeWith<VisualAspect>(mArrow);
-
-        tail_counter = tail_counter-1;
-        }
-
-       
-
-        }
-
-        if(sim0 == 0 || sim0 == 1){
-        //std::cout << "Sim Frames " << mWorld->getSimFrames() << std::endl;
-        mTorso->addExtForce(solver->push);
-
-        auto visualShapeNodes = mTorso->getShapeNodesWith<VisualAspect>();
-        if(visualShapeNodes.size() == 3u)
-        {
-        //assert(visualShapeNodes[2]->getShape() == mArrow);
-        visualShapeNodes[2]->remove();
-        }
-
-        if(solver->push(0) != 0.0 || solver->push(1) != 0.0){
-        tail_counter = 110;
-        }
-
-        if (tail_counter >0 && mWorld->getSimFrames()>100){
-        std::shared_ptr<ArrowShape> mArrow;
-        ArrowShape::Properties arrow_properties;
-        arrow_properties.mRadius = 0.05;
-        Eigen::Vector3d tail_offset = Eigen::Vector3d(0.0, 0.0, 0.0);
-        if(solver->push(0) > 0) tail_offset(0) = 0.65;
-        if(solver->push(0) < 0) tail_offset(0) = -0.65;
-        if(solver->push(1) > 0) tail_offset(1) = 0.65;
-        if(solver->push(1) < 0) tail_offset(1) = -0.65;
-
-        Eigen::Vector3d tail_pos = Eigen::Vector3d(-0.1, 0.0, 0.15) ;
-        if(solver->push(0) < 0) tail_pos = Eigen::Vector3d(0.1, 0.0, 0.15) ;
-        if(solver->push(1) < 0) tail_pos = Eigen::Vector3d(0.1, +0.1, 0.15) ;
-        if(solver->push(1) > 0) tail_pos = Eigen::Vector3d(0.1, -0.1, 0.15) ;
-
-        Eigen::Vector3d head_pos = tail_pos - tail_offset;
-
-        mArrow = std::shared_ptr<ArrowShape>(new ArrowShape(
-             Eigen::Vector3d(0.0, 0.0, 0.0),
-             Eigen::Vector3d(0.2, 0.05, 0.05),
-             arrow_properties, dart::Color::Red(1.0)));
-        mArrow->setPositions(
-            head_pos,
-            tail_pos);
-        mTorso->createShapeNodeWith<VisualAspect>(mArrow);
-        tail_counter = tail_counter-1;
-        }
-        }
-
-        if(sim0 == 2 && footstepCounter>10){
-        //std::cout << "Sim Frames " << mWorld->getSimFrames() << std::endl;
-        mTorso->addExtForce(solver->push);
-
-        auto visualShapeNodes = mTorso->getShapeNodesWith<VisualAspect>();
-        if(visualShapeNodes.size() == 3u)
-        {
-        //assert(visualShapeNodes[2]->getShape() == mArrow);
-        visualShapeNodes[2]->remove();
-        }
-
-        if(solver->push(0) != 0.0 || solver->push(1) != 0.0){
-        tail_counter = 110;
-        }
-
-        if (tail_counter >0 && mWorld->getSimFrames()>100){
-        std::shared_ptr<ArrowShape> mArrow;
-        ArrowShape::Properties arrow_properties;
-        arrow_properties.mRadius = 0.05;
-        Eigen::Vector3d tail_offset = Eigen::Vector3d(0.0, 0.0, 0.0);
-        if(solver->push(0) > 0) tail_offset(0) = 0.65;
-        if(solver->push(0) < 0) tail_offset(0) = -0.65;
-        if(solver->push(1) > 0) tail_offset(1) = 0.65;
-        if(solver->push(1) < 0) tail_offset(1) = -0.65;
-
-        Eigen::Vector3d tail_pos = Eigen::Vector3d(-0.1, 0.0, 0.15) ;
-        if(solver->push(0) < 0) tail_pos = Eigen::Vector3d(0.1, 0.0, 0.15) ;
-        if(solver->push(1) < 0) tail_pos = Eigen::Vector3d(0.1, +0.1, 0.15) ;
-        if(solver->push(1) > 0) tail_pos = Eigen::Vector3d(0.1, -0.1, 0.15) ;
-
-        Eigen::Vector3d head_pos = tail_pos - tail_offset;
-
-        mArrow = std::shared_ptr<ArrowShape>(new ArrowShape(
-             Eigen::Vector3d(0.0, 0.0, 0.0),
-             Eigen::Vector3d(0.2, 0.05, 0.05),
-             arrow_properties, dart::Color::Red(1.0)));
-        mArrow->setPositions(
-            head_pos,
-            tail_pos);
-        mTorso->createShapeNodeWith<VisualAspect>(mArrow);
-        tail_counter = tail_counter-1;
-        }
-        }
 
 	Eigen::VectorXd qDot;
 
@@ -270,7 +119,7 @@ void Controller::update()
 	}
 
 	qDotOld = qDot;
-        storeData();
+        //storeData();
         ArmSwing();
         AnkleRegulation(); 
 
@@ -334,58 +183,6 @@ void Controller::storeData() {
         myfile.close();
 
 
-/*
-        myfile.open ("./Data/x.txt",ios::app);
-        myfile << COMPOS(0) <<endl; 
-        myfile.close();
-        myfile.open ("./Data/y.txt",ios::app);
-        myfile << COMPOS(1) <<endl; 
-        myfile.close();
-        myfile.open ("./Data/xz.txt",ios::app);
-        myfile << ZMPPOS(0) <<endl; 
-        myfile.close();
-        myfile.open ("./Data/yz.txt",ios::app);
-        myfile << ZMPPOS(1) <<endl; 
-        myfile.close();
-        myfile.open ("./Data/x_m.txt",ios::app);
-        myfile << COMPOS_meas(0) <<endl; 
-        myfile.close();
-        myfile.open ("./Data/y_m.txt",ios::app);
-        myfile << COMPOS_meas(1) <<endl; 
-        myfile.close();
-
-        myfile.open ("./Data/xd.txt",ios::app);
-        myfile << mRobot->getCOMLinearVelocity()(0) <<endl; 
-        myfile.close();
-        myfile.open ("./Data/yd.txt",ios::app);
-        myfile << mRobot->getCOMLinearVelocity()(1) <<endl; 
-        myfile.close();       
-        myfile.open ("./Data/x_u_M.txt",ios::app);
-        myfile << f_r(0) <<endl; 
-        myfile.close();
-        myfile.open ("./Data/x_u_m.txt",ios::app);
-        myfile << f_r(1) <<endl; 
-        myfile.close();
-        myfile.open ("./Data/y_u_M.txt",ios::app);
-        myfile << f_r(2) <<endl; 
-        myfile.close();
-        myfile.open ("./Data/y_u_m.txt",ios::app);
-        myfile << f_r(3) <<endl; 
-        myfile.close();
-        myfile.open ("./Data/x_u.txt",ios::app);
-        myfile << COMPOS(0)+COMVEL(0)/3.41739249 <<endl; 
-        myfile.close();
-        myfile.open ("./Data/y_u.txt",ios::app);
-        myfile << COMPOS(1)+COMVEL(1)/3.41739249 <<endl; 
-        myfile.close();
-        myfile.open ("./Data/x_um.txt",ios::app);
-        myfile << mTorso->getCOM(mSupportFoot)(0)+COMVEL_meas(0)/3.41739249 <<endl; 
-        myfile.close();
-        myfile.open ("./Data/y_um.txt",ios::app);
-        myfile << mTorso->getCOM(mSupportFoot)(1)+COMVEL_meas(1)/3.41739249 <<endl;
-        myfile.close();
-
-/**/
 }
 
 Eigen::VectorXd Controller::generateWalking(){
@@ -438,42 +235,10 @@ Eigen::VectorXd Controller::generateWalking(){
         bool widj_ref = true;
 
         double vx, vy, vth;
-
-        
-        if (sim0 == 1) {
         vx = 0.0;
         vy = 0.0;
         vth = 0.0;
 
-        }
-        if (sim0 == 0){
-        if (footstepCounter<=3) {
-        vx = 0.0;
-        vy = 0.0;
-        vth = 0.0;
-        }else{
-        vx = -0.1;  //0.2
-        vy = -0.1;
-        vth = 0.0;
-        }
-
-        }
-
-        if (sim0 == 2){
-        if (footstepCounter<=1) {
-        vx = 0.0;
-        vy = 0.0;
-        vth = 0.0;
-        }else{
-        vx = 0.1;  //0.2
-        vy = 0.0;
-        vth = 0.00;
-        }
-
-        }
-
-
-/**/
 	// Compute the CoM prediction using MPC
 	solver->solve(comCurrentPosition, comCurrentVelocity, comCurrentAcceleration, mSwingFoot->getTransform(mSupportFoot),
 			supportFoot, mWorld->getTime()-startWalk*(mWorld->getTimeStep()), vx, vy, vth, widj_ref); //max vel is 0.16, max omega is 0.1
@@ -668,10 +433,7 @@ Eigen::VectorXd Controller::getJointVelocitiesQp(Eigen::VectorXd desider_pos_bas
 	desired_pos << desider_pos_base, desider_pos_SwingFoot;
 	Eigen::VectorXd actual_pos(12);
 	actual_pos << actPosBase, actPosSwingFoot;
-/*
-        Eigen::VectorXd ComVref = Eigen::VectorXd::Zero(12);
-        ComVref<<0.0,0.0,0.0,solver->getOptimalCoMVelocity(), 0.0,0.0,0.0,0.0,0.0,0.0;
-        mTorso->getCOMLinearVelocity()/**/
+
 	// Cost Function
 	Eigen::MatrixXd Jacobian_tot = getTorsoAndSwfJacobian();
 	Eigen::MatrixXd costFunctionH = mWorld->getTimeStep()*mWorld->getTimeStep()*Jacobian_tot.transpose()*taskGain*Jacobian_tot +
@@ -732,31 +494,6 @@ Eigen::VectorXd Controller::getJointVelocitiesStacked(Eigen::VectorXd desider_po
 	Eigen::MatrixXd _taskGain = Eigen::MatrixXd::Identity(12,12);
 
 /*
-	// Torso Orientation
-	_taskGain(0,0) = 0.1;
-	_taskGain(1,1) = 0.1;//0.001;
-	_taskGain(2,2) = 0;//0.001;
-
-	// CoM Position
-	_taskGain(3,3) = 1;  //0.1  10
-	_taskGain(5,5) = 1;
-	_taskGain(5,5) = 0.01;
-
-	// Swing Foot Orientation
-	_taskGain(6,6) = 10;
-	_taskGain(7,7) = 10;
-	_taskGain(8,8) = 10;
-
-	// Swing Foot Position
-	_taskGain(9,9) = 10;
-	_taskGain(10,10) = 10;
-	_taskGain(11,11) = 10;
-
-
-        ikGain = 10;
-
-
-
         //// VERY GOOD
 	// Torso Orientation
 	_taskGain(0,0) = 1;
@@ -1115,24 +852,8 @@ Eigen::VectorXd Controller::getOmnidirectionalSwingFootTrajectoryMPC(Eigen::Vect
 
 void Controller::setInitialConfiguration() {
 
-/*
-  std::cout <<"L_HIP_Y " << mRobot->getDof("L_HIP_Y")->getIndexInSkeleton()<< std::endl;
-  std::cout <<"L_HIP_R " << mRobot->getDof("L_HIP_R")->getIndexInSkeleton()<< std::endl;
-  std::cout <<"L_HIP_P " << mRobot->getDof("L_HIP_P")->getIndexInSkeleton()<< std::endl;
-  std::cout <<"L_KNEE_P " << mRobot->getDof("L_KNEE_P")->getIndexInSkeleton()<< std::endl;
-  std::cout <<"L_ANKLE_P " << mRobot->getDof("L_ANKLE_P")->getIndexInSkeleton()<< std::endl;
-  std::cout <<"L_ANKLE_R " << mRobot->getDof("L_ANKLE_R")->getIndexInSkeleton()<< std::endl;
-  std::cout <<"R_HIP_Y " << mRobot->getDof("R_HIP_Y")->getIndexInSkeleton()<< std::endl;
-  std::cout <<"R_HIP_R " << mRobot->getDof("R_HIP_R")->getIndexInSkeleton()<< std::endl;
-  std::cout <<"R_HIP_P " << mRobot->getDof("R_HIP_P")->getIndexInSkeleton()<< std::endl;
-  std::cout <<"R_KNEE_P " << mRobot->getDof("R_KNEE_P")->getIndexInSkeleton()<< std::endl;
-  std::cout <<"R_ANKLE_P " << mRobot->getDof("R_ANKLE_P")->getIndexInSkeleton()<< std::endl;
-  std::cout <<"R_ANKLE_R " << mRobot->getDof("R_ANKLE_R")->getIndexInSkeleton()<< std::endl;
-std::cout <<"CHEST_P " << mRobot->getDof("CHEST_P")->getIndexInSkeleton()<< std::endl;
-std::cout <<"CHEST_Y " << mRobot->getDof("CHEST_Y")->getIndexInSkeleton()<< std::endl;/**/
-
   Eigen::VectorXd q = mRobot->getPositions();
-  //std::cout <<q.size()<< std::endl;
+
 
 // Floating Base
   q[0] = 0.0;
@@ -1161,19 +882,19 @@ std::cout <<"CHEST_Y " << mRobot->getDof("CHEST_Y")->getIndexInSkeleton()<< std:
 
   mRobot->setPositions(q);
 
-mRobot->setPosition(mRobot->getDof("R_SHOULDER_P")->getIndexInSkeleton(), (4)*M_PI/180 );
-mRobot->setPosition(mRobot->getDof("R_SHOULDER_R")->getIndexInSkeleton(), -8*M_PI/180  );
-mRobot->setPosition(mRobot->getDof("R_SHOULDER_Y")->getIndexInSkeleton(), 0 );
+  mRobot->setPosition(mRobot->getDof("R_SHOULDER_P")->getIndexInSkeleton(), (4)*M_PI/180 );
+  mRobot->setPosition(mRobot->getDof("R_SHOULDER_R")->getIndexInSkeleton(), -8*M_PI/180  );
+  mRobot->setPosition(mRobot->getDof("R_SHOULDER_Y")->getIndexInSkeleton(), 0 );
 
-mRobot->setPosition(mRobot->getDof("R_ELBOW_P")->getIndexInSkeleton(), -25*M_PI/180 );
-mRobot->setPosition(mRobot->getDof("R_ELBOW_P")->getIndexInSkeleton(), -25*M_PI/180 );
+  mRobot->setPosition(mRobot->getDof("R_ELBOW_P")->getIndexInSkeleton(), -25*M_PI/180 );
+  mRobot->setPosition(mRobot->getDof("R_ELBOW_P")->getIndexInSkeleton(), -25*M_PI/180 );
 
-mRobot->setPosition(mRobot->getDof("L_SHOULDER_P")->getIndexInSkeleton(), (4)*M_PI/180  );
-mRobot->setPosition(mRobot->getDof("L_SHOULDER_R")->getIndexInSkeleton(), 8*M_PI/180  );
-mRobot->setPosition(mRobot->getDof("L_SHOULDER_Y")->getIndexInSkeleton(), 0 );
+  mRobot->setPosition(mRobot->getDof("L_SHOULDER_P")->getIndexInSkeleton(), (4)*M_PI/180  );
+  mRobot->setPosition(mRobot->getDof("L_SHOULDER_R")->getIndexInSkeleton(), 8*M_PI/180  );
+  mRobot->setPosition(mRobot->getDof("L_SHOULDER_Y")->getIndexInSkeleton(), 0 );
 
-mRobot->setPosition(mRobot->getDof("L_ELBOW_P")->getIndexInSkeleton(), -25*M_PI/180 ); 
-mRobot->setPosition(mRobot->getDof("L_ELBOW_P")->getIndexInSkeleton(), -25*M_PI/180 ); 
+  mRobot->setPosition(mRobot->getDof("L_ELBOW_P")->getIndexInSkeleton(), -25*M_PI/180 ); 
+  mRobot->setPosition(mRobot->getDof("L_ELBOW_P")->getIndexInSkeleton(), -25*M_PI/180 ); 
 }
 
 void Controller::ArmSwing() {

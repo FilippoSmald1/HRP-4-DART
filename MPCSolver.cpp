@@ -213,7 +213,7 @@ if (widgetReference==false) {
  
     push = Eigen::VectorXd::Zero(3);
 
-    if (InitCom == 0){
+if (InitCom == 0){
 
     measuredComWeight_x = 1;
     measuredComWeight_y = 1;
@@ -223,90 +223,6 @@ if (widgetReference==false) {
 
 
     InitCom = InitCom + 1;
-
-}else{
-
-    if(footstepCounter > 1 ){ 
-
-    if (true) { 
-
-    int sim_0 = 1; 
-
-    if (sim_0 == 1 && false ){
-
-    if (footstepCounter == 7 && controlIter > 1 && controlIter <= 10 ){ 
-        
-        comVel(0) = comVel(0) + 0.01*5;
-        comVel(1) = comVel(1) + 0.01*4.5; //+0.01*4
-        push<< +5*39,4.5*39,0.0; 
-
-    }
-
-    if (footstepCounter == 10 && controlIter > 1 && controlIter <= 10 ){ //14
-        
-        comVel(0) = comVel(0) + 0.01*5.5;
-        push<< 5.5*39,0.0,0.0; 
-
-    }
-
-   if (footstepCounter == 14 && controlIter > 1 && controlIter <= 10  && false){ //14
-        
-        comVel(0) = comVel(0) + 0.01*3;
-        comVel(1) = comVel(1) - 0.01*5;
-        push<< 3*39,-5*39,0.0; 
-
-    }
-
-
-    }
-
-   if (sim_0 == 0 && false) {
-
-    if (footstepCounter == 11 && controlIter > 1 && controlIter <= 10 ){ //14
-        
-        comVel(1) = comVel(1) + 0.01*4.5; //4
-        push<< 0.0,4.5*39,0.0; 
-
-    }
-
-   if (footstepCounter == 12 && controlIter > 1 && controlIter <= 10 ){ //14
-        
-        comVel(0) = comVel(0) - 0.01*3.8;
-
-        push<< -3.8*39,0.0,0.0; 
-
-    }
-
-
-   }
-
-
-   if (sim_0 == 2 && false) {
-
-    if (footstepCounter == 6 || footstepCounter == 7){ //14
-        
-        comVel(0) = measuredComVel(0);
-        comVel(1) = 0.3*comVel(1) + 0.7*measuredComVel(1);
-        if(footstepCounter == 6 && controlIter > 1 && controlIter <= 10) push<< -7*39,0.0,0.0; 
-        //if(footstepCounter == 11 && controlIter > 1 && controlIter <= 10) push<< 2*39,0.0,0.0; 
-    }
-
-if (footstepCounter == 12 && controlIter > 1 && controlIter <= 10 ){ //14
-        
-        comVel(0) = comVel(0) + 0.01*3.8;
-        comVel(1) = comVel(1) - 0.01*3.8;
-
-        push<< 3.8*39,-3.8*39,0.0; 
-
-    }
-
-   }
-
-
-
-}
-
-}
 
 }
 
@@ -347,14 +263,6 @@ if (footstepCounter == 12 && controlIter > 1 && controlIter <= 10 ){ //14
 /**/
 
 
-
-    // Timing adaptation
-    ComputeFeasibilityRegion();
-
-    if(activate_timing_adaptation==true){ 
-    //TimingAdaptation_euristics();
-    TimingAdaptation();
-    }
 
     // Compute matrices to be used
     genUsefulMatrices();
@@ -424,64 +332,9 @@ if (footstepCounter == 12 && controlIter > 1 && controlIter <= 10 ){ //14
 
    
 
-
-    if (footstepCounter == 5 && false){ adaptTime = 3;
-    std::cout<<"adaptTime"<<std::endl;
-    }
-
-    mpcIter = floor(controlIter*controlTimeStep/mpcTimeStep) + adaptTime;
+    mpcIter = floor(controlIter*controlTimeStep/mpcTimeStep);
 
 
-  // Timing manager update
-     if (Timing_Manager(0,0)-controlTimeStep > 0.0099) { //>= 0.0
-
-         Timing_Manager(0,0) = Timing_Manager(0,0) - controlTimeStep;
-         Timing_Manager(4,0) = Timing_Manager(4,0) + controlTimeStep;
-         Timing_Manager(4,2) = Timing_Manager(0,2);
-         Timing_Manager(4,1) = Timing_Manager(0,1);
-         Timing_Manager(5,0) = 0;
-
-     }else{
-         
-        trig_y = true;
-        trig_x = true;
-
-     if (Timing_Manager(4,1) == doublesupport) Timing_Manager(5,0) = 1;
-
-        Eigen::MatrixXd line = Eigen::MatrixXd::Zero(1,3);
-        line << 0, 1, 0;
-        Timing_Manager.block(0,0,1,3) = Timing_Manager.block(1,0,1,3);
-        Timing_Manager.block(1,0,1,3) = Timing_Manager.block(2,0,1,3);
-        Timing_Manager.block(2,0,1,3) = Timing_Manager.block(3,0,1,3);
-        Timing_Manager.block(3,0,1,3) = Timing_Manager.block(4,0,1,3);
-        Timing_Manager(3,0) = Timing_Manager(3,0) + controlTimeStep; 
-        Timing_Manager.block(4,0,1,3) = line;
-     }
-
-    // Updating countdown of adapted step
-    if (CountDown != -100){
-
-    if (CountDown -1 == 1){//CountDown -1 == 2
-    // Reset timing manager matrix, with footstep change (since the adapted step has been performed)
-    Timing_Manager << singleSupportDuration, 1, singleSupportDuration, doubleSupportDuration, 0, doubleSupportDuration, singleSupportDuration, 1, singleSupportDuration, doubleSupportDuration, 0, doubleSupportDuration, 0, 1, 0, 1, 0, 0; 
-    CountDown = -100;
-    }else CountDown = CountDown-1;
-
-    }
-
-/**/
-
-if(activate_timing_adaptation){
-    if(Timing_Manager(5,0)==1){
-        trig_y = true;
-        trig_x = true;
-    	controlIter = 0;
-    	mpcIter = 0;
-        footstepCounter++;
-        std::cout<<"time ="<< simulationTime<<std::endl;
-        std::cout << "Iteration " << controlIter << " Footstep " << footstepCounter << std::endl;
-    }
-}else{
     if(mpcIter>=S+D){ 
         trig_y = true;
         trig_x = true;
@@ -491,11 +344,6 @@ if(activate_timing_adaptation){
         footstepCounter++;
         std::cout << "Iteration " << controlIter << " Footstep " << footstepCounter << std::endl;
     }
-
-}
-
-  
-
 
 
 }
@@ -544,438 +392,12 @@ void MPCSolver::changeReferenceFrame(Eigen::Affine3d swingFootTransform) {
 
 void MPCSolver::ComputeFeasibilityRegion(){
  
-            if (widgetReference==false) {
-            c_k_x = TailIntegral*v_x;
-            c_k_y = TailIntegral*v_y;
-            }else{
-            c_k_x = TailIntegral*vRefX;
-            c_k_y = TailIntegral*vRefY;
-            }
-
-            if(Timing_Manager(0,1) == 1){
-             
-            // SINGLE SUPPORT
-
-            lambda_0 = exp(-omega*(Timing_Manager(0,0)+Timing_Manager(1,0)));
-            lambda_1 = exp(-omega*(Timing_Manager(2,0)+Timing_Manager(3,0)));
-            lambda_tot = exp(-omega*1); 
-
-            x_u_M = (d/2)*(1-lambda_0)+(d/2+deltaXMax)*(lambda_0-lambda_0*lambda_1)+(d/2+2*deltaXMax)*(lambda_0*lambda_1-lambda_tot);
-            x_u_m = - x_u_M;
-
-            if(supportFoot == true){
-            // right support foot
-            y_u_M = (d/2)*(1-lambda_0)+(d/2+deltaYOut)*(lambda_0-lambda_0*lambda_1)+(d/2+1.3*deltaYOut-0*deltaYIn)*(lambda_0*lambda_1-lambda_tot);
-            y_u_m = (-d/2)*(1-lambda_0)+(deltaYIn-d/2)*(lambda_0-lambda_0*lambda_1)+(-d/2+1.3*deltaYIn-0*deltaYOut)*(lambda_0*lambda_1-lambda_tot);
-
-            }else{
-            // left support foot
-            y_u_M = (d/2)*(1-lambda_0)+(d/2-deltaYIn)*(lambda_0-lambda_0*lambda_1)+(d/2+0*deltaYOut-1.3*deltaYIn)*(lambda_0*lambda_1-lambda_tot);
-            y_u_m = (-d/2)*(1-lambda_0)+(-deltaYOut-d/2)*(lambda_0-lambda_0*lambda_1)+(-d/2+0*deltaYIn-1.3*deltaYOut)*(lambda_0*lambda_1-lambda_tot);
-            }
-
-            } else {
-             
-            // DOUBLE SUPPORT
-
-            lambda_0 = exp(-omega*(Timing_Manager(0,0)));
-            lambda_1 = exp(-omega*(Timing_Manager(1,0)+Timing_Manager(2,0)));
-            lambda_tot = exp(-omega*1); 
-
-            x_u_M = (d/2)*(1-lambda_0)+(d/2+deltaXMax)*(lambda_0-lambda_0*lambda_1)+(d/2+2*deltaXMax)*(lambda_0*lambda_1-lambda_tot);
-            x_u_m = - x_u_M;
-
-            if(supportFoot == true){
-            // right support foot
-            y_u_M = (d/2)*(1-lambda_0)+(d/2+deltaYOut)*(lambda_0-lambda_0*lambda_1)+(d/2+1.3*deltaYOut-0*deltaYIn)*(lambda_0*lambda_1-lambda_tot);
-            y_u_m = (-d/2)*(1-lambda_0)+(deltaYIn-d/2)*(lambda_0-lambda_0*lambda_1)+(-d/2+1.3*deltaYIn-0*deltaYOut)*(lambda_0*lambda_1-lambda_tot);
-
-            }else{
-            // left support foot
-            y_u_M = (d/2)*(1-lambda_0)+(d/2-deltaYIn)*(lambda_0-lambda_0*lambda_1)+(d/2+0*deltaYOut-1.3*deltaYIn)*(lambda_0*lambda_1-lambda_tot);
-            y_u_m = (-d/2)*(1-lambda_0)+(-deltaYOut-d/2)*(lambda_0-lambda_0*lambda_1)+(-d/2+0*deltaYIn-1.3*deltaYOut)*(lambda_0*lambda_1-lambda_tot);
-            }
-
-
-
-           }
-
-
-
-if (false){
-            
-
-            double t_k = 0 ; //simulationTime-0.5*footstepCounter;
-
-               
-
-    if(Timing_Manager(0,1) == 1){
-             
-            // SINGLE SUPPORT
-
-            // First predicted step (actually performed)
-            double ts1 = Timing_Manager(0,0);
-            double td1 = Timing_Manager(1,0);
-            // Second predicted step
-            double ts2 = Timing_Manager(2,0);
-            double td2 = Timing_Manager(3,0);
-            // Third predicted step (a part)
-            double ts3 = Timing_Manager(4,0);
-
-            x_u_M = +(d/2)*(1-exp(-omega*ts1))
-                    -(((2*deltaXMax+d)/(2*omega*td1))*(omega*(t_k+ts1+td1)+1)*exp(-omega*(ts1+td1))+(d/2)*exp(-omega*(ts1+td1)))
-                    +(((2*deltaXMax+d)/(2*omega*td1))*(omega*(t_k+ts1)+1)*exp(-omega*(ts1))+(d/2)*exp(-omega*(ts1)))
-                    +(d+deltaXMax)*(exp(-omega*(ts1+td1))-exp(-omega*(ts1+td1+ts2)))
-                    -(((2*deltaXMax+d)/(2*omega*td2))*(omega*(t_k+ts1+td1+ts2+td2)+1)*exp(-omega*(ts1+td1+ts2+td2))+((d+deltaXMax))*exp(-omega*(ts1+td1+ts2+td2)))
-                    +(((2*deltaXMax+d)/(2*omega*td2))*(omega*(t_k+ts1+td1+ts2)+1)*exp(-omega*(ts1+td1+ts2))+((d+deltaXMax))*exp(-omega*(ts1+td1+ts2)))
-                    +(3*d/2+2*deltaXMax)*(exp(-omega*(ts1+td1+ts2+td2))-exp(-omega*(ts1+td1+ts2+td2+ts3)))
-                    +c_k_x;
-
-            x_u_m = -x_u_M;
-
-            if(supportFoot == true){
-        
-
-            // Right support foot
-            y_u_M = +(d/2)*(1-exp(-omega*ts1))
-                    -(((2*deltaYOut+d)/(2*omega*td1))*(omega*(t_k+ts1+td1)+1)*exp(-omega*(ts1+td1))+(d/2)*exp(-omega*(ts1+td1)))
-                    +(((2*deltaYOut+d)/(2*omega*td1))*(omega*(t_k+ts1)+1)*exp(-omega*(ts1))+(d/2)*exp(-omega*(ts1)))
-                    +(d+deltaYOut)*(exp(-omega*(ts1+td1))-exp(-omega*(ts1+td1+ts2)))
-                    -(((2*deltaYIn+d)/(2*omega*td1))*(omega*(t_k+ts1+td1+ts2+td2)+1)*exp(-omega*(ts1+td1+ts2+td2))+((d+deltaYOut-deltaYIn))*exp(-omega*(ts1+td1+ts2+td2)))
-                    +(((2*deltaYIn+d)/(2*omega*td1))*(omega*(t_k+ts1+td1+ts2)+1)*exp(-omega*(ts1+td1+ts2))+((d+deltaYOut-deltaYIn))*exp(-omega*(ts1+td1+ts2)))
-                    +(3*d/2+(deltaYOut-deltaYIn))*(exp(-omega*(ts1+td1+ts2+td2))-exp(-omega*(ts1+td1+ts2+td2+ts3)))
-                    +c_k_y;
-
-            y_u_m = -(d/2)*(1-exp(-omega*ts1))
-                    -((-(2*deltaYIn+d)/(2*omega*td1))*(omega*(t_k+ts1+td1)+1)*exp(-omega*(ts1+td1))+(-d/2)*exp(-omega*(ts1+td1)))
-                    +((-(2*deltaYIn+d)/(2*omega*td1))*(omega*(t_k+ts1)+1)*exp(-omega*(ts1))+(-d/2)*exp(-omega*(ts1)))
-                    +(-d-deltaYIn)*(exp(-omega*(ts1+td1))-exp(-omega*(ts1+td1+ts2)))
-                    -((-(2*deltaYOut+d)/(2*omega*td2))*(omega*(t_k+ts1+td1+ts2+td2)+1)*exp(-omega*(ts1+td1+ts2+td2))+((-d-(+deltaYIn-deltaYOut)))*exp(-omega*(ts1+td1+ts2+td2)))
-                    +((-(2*deltaYOut+d)/(2*omega*td2))*(omega*(t_k+ts1+td1+ts2)+1)*exp(-omega*(ts1+td1+ts2))+((-d-(+deltaYIn-deltaYOut)))*exp(-omega*(ts1+td1+ts2)))
-                    +(-3*d/2-(+deltaYIn-0*deltaYOut))*(exp(-omega*(ts1+td1+ts2+td2))-exp(-omega*(ts1+td1+ts2+td2+ts3)))
-                    +c_k_y;
-
-             }else{
-
-
-             // Left support foot 
-            y_u_M = +(d/2)*(1-exp(-omega*ts1))
-                    -(((2*deltaYIn+d)/(2*omega*td1))*(omega*(t_k+ts1+td1)+1)*exp(-omega*(ts1+td1))+(d/2)*exp(-omega*(ts1+td1)))
-                    +(((2*deltaYIn+d)/(2*omega*td1))*(omega*(t_k+ts1)+1)*exp(-omega*(ts1))+(d/2)*exp(-omega*(ts1)))
-                    +(d+deltaYIn)*(exp(-omega*(ts1+td1))-exp(-omega*(ts1+td1+ts2)))
-                    -(((2*deltaYOut+d)/(2*omega*td1))*(omega*(t_k+ts1+td1+ts2+td2)+1)*exp(-omega*(ts1+td1+ts2+td2))+((d+deltaYIn-deltaYOut))*exp(-omega*(ts1+td1+ts2+td2)))
-                    +(((2*deltaYOut+d)/(2*omega*td1))*(omega*(t_k+ts1+td1+ts2)+1)*exp(-omega*(ts1+td1+ts2))+((d+deltaYIn-deltaYOut))*exp(-omega*(ts1+td1+ts2)))
-                    +(3*d/2+(deltaYIn-deltaYOut))*(exp(-omega*(ts1+td1+ts2+td2))-exp(-omega*(ts1+td1+ts2+td2+ts3)))
-                    +c_k_y;
-
-            y_u_m = -(d/2)*(1-exp(-omega*ts1))
-                    -((-(2*deltaYOut+d)/(2*omega*td1))*(omega*(t_k+ts1+td1)+1)*exp(-omega*(ts1+td1))+(d/2)*exp(-omega*(ts1+td1)))
-                    +((-(2*deltaYOut+d)/(2*omega*td1))*(omega*(t_k+ts1)+1)*exp(-omega*(ts1))+(d/2)*exp(-omega*(ts1)))
-                    +(-d-deltaYOut)*(exp(-omega*(ts1+td1))-exp(-omega*(ts1+td1+ts2)))
-                    -((-(2*deltaYIn+d)/(2*omega*td1))*(omega*(t_k+ts1+td1+ts2+td2)+1)*exp(-omega*(ts1+td1+ts2+td2))+((-d-(+deltaYOut-deltaYIn)))*exp(-omega*(ts1+td1+ts2+td2)))
-                    +((-(2*deltaYIn+d)/(2*omega*td1))*(omega*(t_k+ts1+td1+ts2)+1)*exp(-omega*(ts1+td1+ts2))+((-d-(+deltaYOut-deltaYIn)))*exp(-omega*(ts1+td1+ts2)))
-                    +(-3*d/2-(+deltaYOut-0*deltaYIn))*(exp(-omega*(ts1+td1+ts2+td2))-exp(-omega*(ts1+td1+ts2+td2+ts3)))
-                    +c_k_y;
-
-             }
-
-        }else{
-
-            // DOUBLE SUPPORT
-
-            // First predicted step (actually performed)
-            double ts1 = Timing_Manager(3,0);
-            double td1 = Timing_Manager(0,0);
-            // Second predicted step
-            double ts2 = Timing_Manager(1,0);
-            double td2 = Timing_Manager(2,0);
-            // Third predicted step (a part)
-            double ts3 = 0.3;
-            double td3 = Timing_Manager(4,0);
-
-            x_u_M = -(((2*footstepsOptimalX(0)+d)/(2*omega*td1))*(omega*(t_k+ts1+td1)+1)*exp(-omega*(ts1+td1))+(d/2)*exp(-omega*(ts1+td1)))
-                    +(((2*footstepsOptimalX(0)+d)/(2*omega*td1))*(omega*(t_k+ts1)+1)*exp(-omega*(ts1))+(d/2)*exp(-omega*(ts1)))
-                    +(d+footstepsOptimalX(0))*(exp(-omega*(ts1+td1))-exp(-omega*(ts1+td1+ts2)))
-                    -(((2*deltaXMax+d)/(2*omega*td2))*(omega*(t_k+ts1+td1+ts2+td2)+1)*exp(-omega*(ts1+td1+ts2+td2))+((d+footstepsOptimalX(0)))*exp(-omega*(ts1+td1+ts2+td2)))
-                    +(((2*deltaXMax+d)/(2*omega*td2))*(omega*(t_k+ts1+td1+ts2)+1)*exp(-omega*(ts1+td1+ts2))+((d+footstepsOptimalX(0)))*exp(-omega*(ts1+td1+ts2)))
-                    +(3*d/2+2*deltaXMax)*(exp(-omega*(ts1+td1+ts2+td2))-exp(-omega*(ts1+td1+ts2+td2+ts3)))
-                    -(((2*deltaXMax+d)/(2*omega*td2))*(omega*(t_k+ts1+td1+ts2+td2+ts3+td3)+1)*exp(-omega*(ts1+td1+ts2+td2+ts3+td3))+((d+deltaXMax+footstepsOptimalX(0)))*exp(-omega*(ts1+td1+ts2+td2+ts3+td3)))
-                    +(((2*deltaXMax+d)/(2*omega*td2))*(omega*(t_k+ts1+td1+ts2+ts3)+1)*exp(-omega*(ts1+td1+ts2+ts3))+((d+deltaXMax+footstepsOptimalX(0)))*exp(-omega*(ts1+td1+ts2+ts3)))
-                    +c_k_x;
-
-            x_u_m = -x_u_M;
-
-            if(supportFoot == true){
-        
-
-            // Right support foot
-            y_u_M = -(((2*footstepsOptimalY(0)+d)/(2*omega*td1))*(omega*(t_k+ts1+td1)+1)*exp(-omega*(ts1+td1))+(d/2)*exp(-omega*(ts1+td1)))
-                    +(((2*footstepsOptimalY(0)+d)/(2*omega*td1))*(omega*(t_k+ts1)+1)*exp(-omega*(ts1))+(d/2)*exp(-omega*(ts1)))
-                    +(d+footstepsOptimalY(0))*(exp(-omega*(ts1+td1))-exp(-omega*(ts1+td1+ts2)))
-                    -(((2*deltaYIn+d)/(2*omega*td2))*(omega*(t_k+ts1+td1+ts2+td2)+1)*exp(-omega*(ts1+td1+ts2+td2))+((d+footstepsOptimalY(0)-deltaYIn))*exp(-omega*(ts1+td1+ts2+td2)))
-                    +(((2*deltaYIn+d)/(2*omega*td2))*(omega*(t_k+ts1+td1+ts2)+1)*exp(-omega*(ts1+td1+ts2))+((d+footstepsOptimalY(0)-deltaYIn))*exp(-omega*(ts1+td1+ts2)))
-                    +(3*d/2+(footstepsOptimalY(0)-deltaYIn))*(exp(-omega*(ts1+td1+ts2+td2))-exp(-omega*(ts1+td1+ts2+td2+ts3)))
-                    -(((2*deltaYOut+d)/(2*omega*td2))*(omega*(t_k+ts1+td1+ts2+td2+ts3+td3)+1)*exp(-omega*(ts1+td1+ts2+td2+ts3+td3))+((3*d/2+footstepsOptimalY(0)-deltaYIn))*exp(-omega*(ts1+td1+ts2+td2+ts3+td3)))
-                    +(((2*deltaYOut+d)/(2*omega*td2))*(omega*(t_k+ts1+td1+ts2+ts3)+1)*exp(-omega*(ts1+td1+ts2+ts3))+((3*d/2+footstepsOptimalY(0)-deltaYIn))*exp(-omega*(ts1+td1+ts2+ts3)))
-                    +c_k_y;
-
-            y_u_m = -((-(2*footstepsOptimalY(0)+d)/(2*omega*td1))*(omega*(t_k+ts1+td1)+1)*exp(-omega*(ts1+td1))+(-d/2)*exp(-omega*(ts1+td1)))
-                    +((-(2*footstepsOptimalY(0)+d)/(2*omega*td1))*(omega*(t_k+ts1)+1)*exp(-omega*(ts1))+(-d/2)*exp(-omega*(ts1)))
-                    +(-d-footstepsOptimalY(0))*(exp(-omega*(ts1+td1))-exp(-omega*(ts1+td1+ts2)))
-                    -((-(2*deltaYOut+d)/(2*omega*td2))*(omega*(t_k+ts1+td1+ts2+td2)+1)*exp(-omega*(ts1+td1+ts2+td2))+((-d-(+footstepsOptimalY(0)-deltaYOut)))*exp(-omega*(ts1+td1+ts2+td2)))
-                    +((-(2*deltaYOut+d)/(2*omega*td2))*(omega*(t_k+ts1+td1+ts2)+1)*exp(-omega*(ts1+td1+ts2))+((-d-(+footstepsOptimalY(0)-deltaYOut)))*exp(-omega*(ts1+td1+ts2)))
-                    +(-3*d/2-(+footstepsOptimalY(0)-0*deltaYOut))*(exp(-omega*(ts1+td1+ts2+td2))-exp(-omega*(ts1+td1+ts2+td2+ts3)))
-                    -((-(2*deltaYIn+d)/(2*omega*td2))*(omega*(t_k+ts1+td1+ts2+td2+ts3+td3)+1)*exp(-omega*(ts1+td1+ts2+td2+ts3+td3))+((-3*d/2-(+footstepsOptimalY(0)-0*deltaYOut)))*exp(-omega*(ts1+td1+ts2+td2+ts3+td3)))
-                    +((-(2*deltaYIn+d)/(2*omega*td2))*(omega*(t_k+ts1+td1+ts2+ts3)+1)*exp(-omega*(ts1+td1+ts2+ts3))+((-3*d/2-(+footstepsOptimalY(0)-0*deltaYOut)))*exp(-omega*(ts1+td1+ts2+ts3)))
-                    +c_k_y;
-
-             }else{
-
-
-             // Left support foot 
-            y_u_M = -(((2*footstepsOptimalY(0)+d)/(2*omega*td1))*(omega*(t_k+ts1+td1)+1)*exp(-omega*(ts1+td1))+(d/2)*exp(-omega*(ts1+td1)))
-                    +(((2*footstepsOptimalY(0)+d)/(2*omega*td1))*(omega*(t_k+ts1)+1)*exp(-omega*(ts1))+(d/2)*exp(-omega*(ts1)))
-                    +(d+footstepsOptimalY(0))*(exp(-omega*(ts1+td1))-exp(-omega*(ts1+td1+ts2)))
-                    -(((2*deltaYOut+d)/(2*omega*td1))*(omega*(t_k+ts1+td1+ts2+td2)+1)*exp(-omega*(ts1+td1+ts2+td2))+((d+footstepsOptimalY(0)-deltaYOut))*exp(-omega*(ts1+td1+ts2+td2)))
-                    +(((2*deltaYOut+d)/(2*omega*td1))*(omega*(t_k+ts1+td1+ts2)+1)*exp(-omega*(ts1+td1+ts2))+((d+footstepsOptimalY(0)-deltaYOut))*exp(-omega*(ts1+td1+ts2)))
-                    +(3*d/2+(footstepsOptimalY(0)-deltaYOut))*(exp(-omega*(ts1+td1+ts2+td2))-exp(-omega*(ts1+td1+ts2+td2+ts3)))
-                    -(((2*deltaYIn+d)/(2*omega*td2))*(omega*(t_k+ts1+td1+ts2+td2+ts3+td3)+1)*exp(-omega*(ts1+td1+ts2+td2+ts3+td3))+((3*d/2+(footstepsOptimalY(0)-deltaYOut)))*exp(-omega*(ts1+td1+ts2+td2+ts3+td3)))
-                    +(((2*deltaYIn+d)/(2*omega*td2))*(omega*(t_k+ts1+td1+ts2+ts3)+1)*exp(-omega*(ts1+td1+ts2+ts3))+((3*d/2+(footstepsOptimalY(0)-deltaYOut)))*exp(-omega*(ts1+td1+ts2+ts3)))
-                    +c_k_y;
-
-            y_u_m = -((-(2*footstepsOptimalY(0)+d)/(2*omega*td1))*(omega*(t_k+ts1+td1)+1)*exp(-omega*(ts1+td1))+(d/2)*exp(-omega*(ts1+td1)))
-                    +((-(2*footstepsOptimalY(0)+d)/(2*omega*td1))*(omega*(t_k+ts1)+1)*exp(-omega*(ts1))+(d/2)*exp(-omega*(ts1)))
-                    +(-d-footstepsOptimalY(0))*(exp(-omega*(ts1+td1))-exp(-omega*(ts1+td1+ts2)))
-                    -((-(2*deltaYIn+d)/(2*omega*td1))*(omega*(t_k+ts1+td1+ts2+td2)+1)*exp(-omega*(ts1+td1+ts2+td2))+((-d-(+footstepsOptimalY(0)-deltaYIn)))*exp(-omega*(ts1+td1+ts2+td2)))
-                    +((-(2*deltaYIn+d)/(2*omega*td1))*(omega*(t_k+ts1+td1+ts2)+1)*exp(-omega*(ts1+td1+ts2))+((-d-(+footstepsOptimalY(0)-deltaYIn)))*exp(-omega*(ts1+td1+ts2)))
-                    +(-3*d/2-(+footstepsOptimalY(0)-0*deltaYIn))*(exp(-omega*(ts1+td1+ts2+td2))-exp(-omega*(ts1+td1+ts2+td2+ts3)))
-                    -((-(2*deltaYOut+d)/(2*omega*td2))*(omega*(t_k+ts1+td1+ts2+td2+ts3+td3)+1)*exp(-omega*(ts1+td1+ts2+td2+ts3+td3))+((-3*d/2-(+footstepsOptimalY(0)-0*deltaYIn)))*exp(-omega*(ts1+td1+ts2+td2+ts3+td3)))
-                    +((-(2*deltaYOut+d)/(2*omega*td2))*(omega*(t_k+ts1+td1+ts2+ts3)+1)*exp(-omega*(ts1+td1+ts2+ts3))+((-3*d/2-(+footstepsOptimalY(0)-0*deltaYIn)))*exp(-omega*(ts1+td1+ts2+ts3)) )
-                    +c_k_y;
-
-
-                    
-
-
-             }
-
-}
-
-
-
-}
-}
-
-void MPCSolver::TimingAdaptation() {
-
-            if (footstepCounter>0){
-            margin_x = 0.02;  //0.015
-            margin_y = 0.02;
-            //margin_x = 0.0;
-            //margin_y = 0.0;
-            }
-
-            xu_state = comPos(0)+comVel(0)/omega;
-            yu_state = comPos(1)+comVel(1)/omega;
-
-
-        if(Timing_Manager(0,1) == 1){
-        // SINGLE SUPPORT
-        t_MIN = Timing_Manager(0,0)-0.05;
-        if (t_MIN < 0.05) t_MIN = 0.05;
-        t_MAX = exp(-omega*(t_MIN + Timing_Manager(1,0)));
-        } else {             
-        // DOUBLE SUPPORT
-        t_MAX = exp(-omega*(0.03+0.5*Timing_Manager(0,0)));
-        }
-
-        t_MIN = exp(-omega*0.5);
-
-
-
-        // CLOSED FORM SOLUTION
-
-        // x component
-
-        if ( (x_u_M-xu_state)*(x_u_M-xu_state) < (-x_u_m+xu_state)*(-x_u_M+xu_state)){
-           // upper bound can be activated
-
-           if(xu_state>=x_u_M-margin_x){
-
-                double l0 = (xu_state+margin_x-d/2 +(d/2+2*deltaXMax)*lambda_tot)/(-d/2+(d/2+deltaXMax)*(1-lambda_1)+(d/2+2*deltaXMax)*(lambda_1));
-                if (l0<=t_MAX) new_timing_x = -(1/omega)*log(l0);
-                else new_timing_x = -(1/omega)*log(t_MAX);
-
-            }else{ 
-            if(Timing_Manager(0,1) == 1) new_timing_x = Timing_Manager(0,0)+Timing_Manager(1,0);
-            if(Timing_Manager(0,1) == 0) new_timing_x = Timing_Manager(0,0);
-            }
-
-        }else{
-           // lower bound can be activated
-
-           if(xu_state<=x_u_m+margin_x){
-
-           xu_state = -xu_state;
-
-           double l0 = (xu_state+margin_x-d/2 +(d/2+2*deltaXMax)*lambda_tot)/(-d/2+(d/2+deltaXMax)*(1-lambda_1)+(d/2+2*deltaXMax)*(lambda_1));
-
-           if (l0<=t_MAX) new_timing_x = -(1/omega)*log(l0);
-           else new_timing_x = -(1/omega)*log(t_MAX);
-
-           }else{ 
-            if(Timing_Manager(0,1) == 1) new_timing_x = Timing_Manager(0,0)+Timing_Manager(1,0);
-            if(Timing_Manager(0,1) == 0) new_timing_x = Timing_Manager(0,0);
-            }
-        }
-
-        // y component
-
-         if (footstepCounter%2==1){ yu_state = -yu_state;
-           y_u_M = -((-d/2)*(1-lambda_0)+(deltaYIn-d/2)*(lambda_0-lambda_0*lambda_1)+(-d/2+1.3*deltaYIn-0*deltaYOut)*(lambda_0*lambda_1-lambda_tot));
-           y_u_m = -((d/2)*(1-lambda_0)+(d/2+deltaYOut)*(lambda_0-lambda_0*lambda_1)+(d/2+1.3*deltaYOut-0*deltaYIn)*(lambda_0*lambda_1-lambda_tot));
-
-           }    
-
-
-        if ( (y_u_M-yu_state)*(y_u_M-yu_state) < (-y_u_m+yu_state)*(-y_u_M+yu_state)){
-
-
-           // upper bound can be activated
-
-           if(yu_state>=y_u_M-margin_y){
-
-                double l0;
-                if(Timing_Manager(0,1) == 1) l0 = exp(-omega*(Timing_Manager(0,0)+Timing_Manager(1,0)-0.04));  // -0.03
-                else { 
-                if(Timing_Manager(0,1) == 1) l0 = exp(-omega*(Timing_Manager(0,0)+Timing_Manager(1,0)-0.03));
-                if(Timing_Manager(0,1) == 0) l0 = exp(-omega*(Timing_Manager(0,0)-0.03));
-                }
-
-
-
-                if (l0<=t_MAX) new_timing_y = -(1/omega)*log(l0);
-                else new_timing_y = -(1/omega)*log(t_MAX);
-
-            }else{ 
-            if(Timing_Manager(0,1) == 1) new_timing_y = Timing_Manager(0,0)+Timing_Manager(1,0);
-            if(Timing_Manager(0,1) == 0) new_timing_y = Timing_Manager(0,0);
-            }
-
-        }else{
-
-
-           // lower bound can be activated
-
-           if(yu_state<=y_u_m+margin_y){
-
-
-           double l0 = (yu_state-margin_y+d/2 +(-d/2+deltaYIn-deltaYOut)*lambda_tot)/(d/2-(d/2+deltaYOut)*(1-lambda_1)+(-d/2+deltaYIn-deltaYOut)*(lambda_1));
-
-
-           if (l0<=t_MAX) new_timing_y = -(1/omega)*log(l0);
-           else new_timing_y = -(1/omega)*log(t_MAX);
-
-           }else{ 
-            if(Timing_Manager(0,1) == 1) new_timing_y = Timing_Manager(0,0)+Timing_Manager(1,0);
-            if(Timing_Manager(0,1) == 0) new_timing_y = Timing_Manager(0,0);
-            }
-        }
  
-         if (footstepCounter%2==1){ yu_state = -yu_state;
-           y_u_M = (d/2)*(1-lambda_0)+(d/2+deltaYOut)*(lambda_0-lambda_0*lambda_1)+(d/2+1.3*deltaYOut-0*deltaYIn)*(lambda_0*lambda_1-lambda_tot);
-            y_u_m = (-d/2)*(1-lambda_0)+(deltaYIn-d/2)*(lambda_0-lambda_0*lambda_1)+(-d/2+1.3*deltaYIn-0*deltaYOut)*(lambda_0*lambda_1-lambda_tot);
-           }    
-
-
-
-     if(new_timing_x<new_timing_y) new_timing = new_timing_x;
-     if(new_timing_y<new_timing_x) new_timing = new_timing_y;
-     if(new_timing_y==new_timing_x) new_timing = new_timing_y;
-
-     if (Timing_Manager(0,0)>0.1 && Timing_Manager(0,1) == 1 && new_timing -0.2 + 0.01 < Timing_Manager(0,0) && footstepCounter>2 && new_timing>0 && adaptSim){
-     Timing_Manager(4,0) = Timing_Manager(0,0)-(new_timing-0.2);
-     Timing_Manager(0,2) = Timing_Manager(0,2)*(new_timing-0.2)/Timing_Manager(0,0);
-     if (0.01*round((new_timing-0.2)/0.01)> 0.01){
-     Timing_Manager(0,0) = 0.01*round((new_timing-0.2)/0.01);
-     }else{
-     Timing_Manager(0,0) = 0.01*round((new_timing-0.2)/0.01)+0*0.02;
-     }
-     Timing_Manager(4,2) = Timing_Manager(4,0);
-     CountDown = round((new_timing)/0.01);
-     }
-
-     if (Timing_Manager(0,0)>0.08 && Timing_Manager(0,1) == 0 && new_timing + 0.01 < Timing_Manager(0,0) && footstepCounter>2 &&  new_timing>0 && adaptSim){
-     Timing_Manager(4,0) = Timing_Manager(0,0)-(new_timing);
-     Timing_Manager(0,2) = Timing_Manager(0,2)*(new_timing)/Timing_Manager(0,0);
-     Timing_Manager(0,0) = 0.01*round((new_timing)/0.01)+0*0.01;
-     Timing_Manager(4,2) = Timing_Manager(4,0);
-     CountDown = round((new_timing)/0.01);
-     //int y = getchar();
-     }
-
 }
 
 
 void MPCSolver::TimingAdaptation_euristics(){
 
-if(Timing_Manager(0,1) == 1){
-
-     double alpha, lambda_p, alpha_bar, t_ss_x, t_ss_y;
-     t_ss_x = 0.0;
-     t_ss_y = t_ss_x;
-
-     alpha_bar = (Timing_Manager(0,0))/Timing_Manager(0,2);
-
-     if(comPos(0)+comVel(0)/omega>0.0){
-     alpha = alpha_bar*((comPos(0)+comVel(0)/omega)/(x_u_M-0.1));
-
-           //if(alpha>0.6) t_ss_x = (-1/omega)*log((alpha+exp(-omega*Timing_Manager(0,0)))/(1+alpha)); 
-           if(x_u_M-((comPos(0)+comVel(0)/omega))<0.16) t_ss_x = (-1/omega)*log((alpha_bar+exp(-omega*Timing_Manager(0,0)))/(1+alpha_bar)); //0.16
-
-     }else{
-     alpha = alpha_bar*((comPos(0)+comVel(0)/omega)/(x_u_m+0.1));
-
-           //if(alpha>0.60) t_ss_x = (-1/omega)*log((alpha+exp(-omega*Timing_Manager(0,0)))/(1+alpha)); 
-           if(((comPos(0)+comVel(0)/omega))-x_u_m<0.16) t_ss_x = (-1/omega)*log((alpha_bar+exp(-omega*Timing_Manager(0,0)))/(1+alpha_bar));
-
-     }
-
-     if(comPos(1)+comVel(1)/omega>0.0){
-     alpha = alpha_bar*((comPos(1)+comVel(1)/omega)/(y_u_M-0.05));
-
-           //if(alpha>0.60) t_ss_y = (-1/omega)*log((alpha+exp(-omega*Timing_Manager(0,0)))/(1+alpha)); 
-           if(y_u_M-((comPos(1)+comVel(1)/omega))<0.1) t_ss_y = (-1/omega)*log((alpha_bar+exp(-omega*Timing_Manager(0,0)))/(1+alpha_bar)); //0.1
-
-     }else{
-     alpha = alpha_bar*((comPos(1)+comVel(1)/omega)/(y_u_m+0.05));
-
-           //if(alpha>0.60) t_ss_y = (-1/omega)*log((alpha+exp(-omega*Timing_Manager(0,0)))/(1+alpha)); 
-           if(((comPos(1)+comVel(1)/omega))-x_u_m<0.1) t_ss_y = (-1/omega)*log((alpha_bar+exp(-omega*Timing_Manager(0,0)))/(1+alpha_bar));
-
-     }
-
-     if(t_ss_x>t_ss_y && t_ss_x>0.02){
-     if(CountDown == -100){
-     Timing_Manager(4,0) = Timing_Manager(0,0)-t_ss_x;
-     Timing_Manager(0,2) = Timing_Manager(0,2)*t_ss_x/Timing_Manager(0,0);
-     Timing_Manager(0,0) = t_ss_x+0.01;
-     Timing_Manager(4,2) = Timing_Manager(4,0);
-     CountDown = round((t_ss_y+Timing_Manager(1,0))/0.01);
-     }
-     }
-     if(t_ss_y>t_ss_x && t_ss_y>0.02){
-     if(CountDown == -100){
-     Timing_Manager(4,0) = Timing_Manager(0,0)-t_ss_y;
-     Timing_Manager(0,2) = Timing_Manager(0,2)*t_ss_y/Timing_Manager(0,0);
-     Timing_Manager(0,0) = t_ss_y+0.01;
-     Timing_Manager(4,2) = Timing_Manager(4,0);
-     CountDown = round((t_ss_y+Timing_Manager(1,0))/0.01);
-     }
-     }
-
-
-}
 
 }
 
@@ -1021,156 +443,7 @@ void MPCSolver::genUsefulMatrices() {
 		Icf(i,i)=1;
 	}
 
-        int S_1,D_1,S_2,D_2,S_3,D_3;
-
-if(activate_timing_adaptation){
-
-        // With timing adaptation        
-
-        if (Timing_Manager(0,1)==singlesupport){
-
-            // First predicted step (actually performed)
-            S_1 = round(Timing_Manager(0,2)/mpcTimeStep);
-            D_1 = round(Timing_Manager(1,2)/mpcTimeStep);
-            // Second predicted step
-            S_2 = round(Timing_Manager(2,2)/mpcTimeStep);
-            D_2 = round(Timing_Manager(3,2)/mpcTimeStep);
-            // Third predicted step (a part)
-            S_3 = mpcIter; //round(Timing_Manager(4,0)/mpcTimeStep)
-
-
-            if (S_1+D_1+S_2+D_2+S_3>20 && floor(Timing_Manager(4,0)/mpcTimeStep) == 0) S_1 = S_1-1;
-            //if (S_1+D_1+S_2+D_2+S_3>20 && floor(Timing_Manager(4,0)/mpcTimeStep) > 0) S_3 = S_3-1;
-            if (S_1+D_1+S_2+D_2+S_3<20 && floor(Timing_Manager(4,0)/mpcTimeStep) == 0) S_1 = S_1+1;
-            //if (S_1+D_1+S_2+D_2+S_3<20 && floor(Timing_Manager(4,0)/mpcTimeStep) > 0) S_3 = S_3+1;
-
-
-            Ic.block(0,0,S_1-mpcIter,S_1-mpcIter) = Eigen::MatrixXd::Identity(S_1-mpcIter,S_1-mpcIter);
-            Ic.block(S_1-mpcIter,S_1-mpcIter,D_1,D_1) = Eigen::MatrixXd::Zero(D_1,D_1);
-/*
-            Ic.block(S_1-mpcIter,S_1-mpcIter,D_1,D_1) = (Eigen::MatrixXd::Ones(D_1,D_1));
-            Ic.block(S_1-mpcIter,S_1-mpcIter,D_1,D_1) = 0.5*Ic.block(S_1-mpcIter,S_1-mpcIter,D_1,D_1);/**/
-
-            Ic.block(S_1+D_1-mpcIter,S_1+D_1-mpcIter,S_2,S_2) = Eigen::MatrixXd::Identity(S_2,S_2);
-            Ic.block(S_1+D_1+S_2-mpcIter,S_1+D_1+S_2-mpcIter,D_2,D_2) = Eigen::MatrixXd::Zero(D_2,D_2);
-/*
-            Ic.block(S_1+D_1+S_2-mpcIter,S_1+D_1+S_2-mpcIter,D_2,D_2) = (Eigen::MatrixXd::Ones(D_2,D_2));
-            Ic.block(S_1+D_1+S_2-mpcIter,S_1+D_1+S_2-mpcIter,D_2,D_2) = 0.5*Ic.block(S_1+D_1+S_2-mpcIter,S_1+D_1+S_2-mpcIter,D_2,D_2);/**/
-
-            if (mpcIter>0) Ic.block(S_1+D_1+S_2+D_2-mpcIter,S_1+D_1+S_2+D_2-mpcIter,mpcIter,mpcIter) = Eigen::MatrixXd::Identity(mpcIter,mpcIter);
-
-
-            rCosZmp.block(0,0,S_1+D_1-mpcIter,S_1+D_1-mpcIter) = Eigen::MatrixXd::Identity(S_1+D_1-mpcIter,S_1+D_1-mpcIter); //S_1+D_1-mpcIter
-	    rSinZmp.block(0,0,S_1+D_1-mpcIter,S_1+D_1-mpcIter) = Eigen::MatrixXd::Zero(S_1+D_1-mpcIter,S_1+D_1-mpcIter);
-
-            rCosZmp.block(S_1+D_1-mpcIter,S_1+D_1-mpcIter,S_2+D_2,S_2+D_2) = Eigen::MatrixXd::Identity(S_2+D_2,S_2+D_2)*cos(predictedOrientations(1));
-	    rSinZmp.block(S_1+D_1-mpcIter,S_1+D_1-mpcIter,S_2+D_2,S_2+D_2) = Eigen::MatrixXd::Identity(S_2+D_2,S_2+D_2)*sin(predictedOrientations(1));
-
-            if(mpcIter>0){
-            rCosZmp.block(S_1+D_1+S_2+D_2-mpcIter,S_1+D_1+S_2+D_2-mpcIter,mpcIter,mpcIter) = Eigen::MatrixXd::Identity(mpcIter,mpcIter)*cos(predictedOrientations(2));
-	    rSinZmp.block(S_1+D_1+S_2+D_2-mpcIter,S_1+D_1+S_2+D_2-mpcIter,mpcIter,mpcIter) = Eigen::MatrixXd::Identity(mpcIter,mpcIter)*sin(predictedOrientations(2));
-            }
-
-
-        }else{
-
-
-            // First predicted step (actually performed)   
-            D_1 = round(Timing_Manager(0,2)/mpcTimeStep);
-            // Second predicted step
-            S_1 = round(Timing_Manager(3,2)/mpcTimeStep);
-            D_2 = round(Timing_Manager(2,2)/mpcTimeStep);
-            // Third predicted step
-            S_2 = round(Timing_Manager(1,2)/mpcTimeStep);
-            D_3 = round(Timing_Manager(5,2)/mpcTimeStep);
-            
-            if (S_2+D_3>mpcIter) D_3 = D_3-1;
-            if (S_2+D_3<mpcIter) D_3 = D_3+1;
   
-            if (floor(Timing_Manager(4,0)/mpcTimeStep) == 0){
-            D_3 = 0;
-            D_1 = ceil(Timing_Manager(0,0)/mpcTimeStep);
-            }
-
-            if (S_1+D_1+S_2+D_2+D_3>20 && floor(Timing_Manager(4,0)/mpcTimeStep) == 0) D_1 = D_1-1;
-            //if (S_1+D_1+S_2+D_2+D_3>20 && floor(Timing_Manager(4,0)/mpcTimeStep) > 0) D_3 = D_3-1;
-            if (S_1+D_1+S_2+D_2+D_3<20 && floor(Timing_Manager(4,0)/mpcTimeStep) == 0) D_1 = D_1+1;
-            //if (S_1+D_1+S_2+D_2+D_3<20 && floor(Timing_Manager(4,0)/mpcTimeStep) > 0) D_3 = D_3+1;
-
-
-            Ic.block(0,0,S_1+D_1-mpcIter,S_1+D_1-mpcIter) = Eigen::MatrixXd::Zero(S_1+D_1-mpcIter,S_1+D_1-mpcIter);
-/*
-            Ic.block(0,0,S_1+D_1-mpcIter,S_1+D_1-mpcIter) = (Eigen::MatrixXd::Ones(S_1+D_1-mpcIter,S_1+D_1-mpcIter));
-            Ic.block(0,0,S_1+D_1-mpcIter,S_1+D_1-mpcIter) = 0.5*Ic.block(0,0,S_1+D_1-mpcIter,S_1+D_1-mpcIter);
-/**/
-            Ic.block(S_1+D_1-mpcIter,S_1+D_1-mpcIter,S_2,S_2) = Eigen::MatrixXd::Identity(S_2,S_2);
-            Ic.block(S_1+D_1+S_2-mpcIter,S_1+D_1+S_2-mpcIter,D_2,D_2) = Eigen::MatrixXd::Zero(D_2,D_2);
-/*
-            Ic.block(S_1+D_1+S_2-mpcIter,S_1+D_1+S_2-mpcIter,D_2,D_2) = (Eigen::MatrixXd::Ones(D_2,D_2));
-            Ic.block(S_1+D_1+S_2-mpcIter,S_1+D_1+S_2-mpcIter,D_2,D_2) = 0.5*(Ic.block(S_1+D_1+S_2-mpcIter,S_1+D_1+S_2-mpcIter,D_2,D_2));/**/
-
-            if (mpcIter-S_1<=0){
-
-            Ic.block(D_1+S_1+D_2+S_2-mpcIter,D_1+S_1+D_2+S_2-mpcIter,mpcIter,mpcIter) = Eigen::MatrixXd::Identity(mpcIter,mpcIter);
-
-            }else{ 
-            Ic.block(D_1+S_1+D_2+S_2-mpcIter,D_1+S_1+D_2+S_2-mpcIter,S_1,S_1) = Eigen::MatrixXd::Identity(S_1,S_1);
-            Ic.block(D_1+2*S_1+D_2+S_2-mpcIter,D_1+2*S_1+D_2+S_2-mpcIter,mpcIter-S_1,mpcIter-S_1) =                  Eigen::MatrixXd::Zero(mpcIter-S_1,mpcIter-S_1);}
-
-            rCosZmp.block(0,0,S_1+D_1-mpcIter,S_1+D_1-mpcIter) = Eigen::MatrixXd::Identity(S_1+D_1-mpcIter,S_1+D_1-mpcIter);
-	    rSinZmp.block(0,0,S_1+D_1-mpcIter,S_1+D_1-mpcIter) = Eigen::MatrixXd::Zero(S_1+D_1-mpcIter,S_1+D_1-mpcIter);
-
-            rCosZmp.block(S_1+D_1-mpcIter,S_1+D_1-mpcIter,S_2+D_2,S_2+D_2) = Eigen::MatrixXd::Identity(S_2+D_2,S_2+D_2)*cos(predictedOrientations(1));
-	    rSinZmp.block(S_1+D_1-mpcIter,S_1+D_1-mpcIter,S_2+D_2,S_2+D_2) = Eigen::MatrixXd::Identity(S_2+D_2,S_2+D_2)*sin(predictedOrientations(1));
-
-            rCosZmp.block(D_1+S_1+D_2+S_2-mpcIter,D_1+S_1+D_2+S_2-mpcIter,mpcIter,mpcIter) = Eigen::MatrixXd::Identity(mpcIter,mpcIter)*cos(predictedOrientations(2));
-	    rSinZmp.block(D_1+S_1+D_2+S_2-mpcIter,D_1+S_1+D_2+S_2-mpcIter,mpcIter,mpcIter) = Eigen::MatrixXd::Identity(mpcIter,mpcIter)*sin(predictedOrientations(2));
-
-        }
-
-        // Don't plan to move for the first step
-	if((int)simulationTime/mpcTimeStep<S+D){
-		Ic.block(0,0,S+D-mpcIter,S+D-mpcIter) = Eigen::MatrixXd::Zero(S+D-mpcIter,S+D-mpcIter);
-	}
-
-
-
-
-
-	Eigen::MatrixXd Cc_ = Eigen::MatrixXd::Zero(N,M);
-        Cc = Cc_;
-
-
-        if (Timing_Manager(0,1) == singlesupport){
-        // Single support
-  
-        if(Timing_Manager(4,1)==doublesupport && Timing_Manager(4,0) == 0){//Timing_Manager(5,0)==1
-        Cc_.block(0,0,N/2,1) = Eigen::VectorXd::Ones(N/2);
-        Cc_.block(N/2,1,N/2,1) = Eigen::VectorXd::Ones(N/2);
-        }else{
-
-        Cc_.block(S_1+D_1-mpcIter,0,S_2+D_2,1) = Eigen::VectorXd::Ones(S_2+D_2);
-
-        if(N-(S_1+D_1+S_2+D_2-mpcIter)>0) Cc_.block(S_1+D_1+S_2+D_2-mpcIter,1,mpcIter,1) = Eigen::VectorXd::Ones(mpcIter);
-        }
-
-        }else{
-        // Double support
-        Cc_.block(S_1+D_1-mpcIter,0,S_2+D_2,1) = Eigen::VectorXd::Ones(S_2+D_2);
-        Cc_.block(S_1+D_1+S_2+D_2-mpcIter,1,mpcIter,1) = Eigen::VectorXd::Ones(mpcIter);
-        }
-
-        
-        Cc = Cc_;
-
-
-	zmpRotationMatrix << rCosZmp,rSinZmp,
-						-rSinZmp,rCosZmp;
-/*
-       Eigen::MatrixXd  __Ic = Eigen::MatrixXd::Zero(N,N);
-       __Ic = Ic;
-/**/
-}else{  
         // No timing adaptation
 
 
@@ -1249,10 +522,7 @@ if(activate_timing_adaptation){
 
 
 	zmpRotationMatrix << rCosZmp,rSinZmp,
-						-rSinZmp,rCosZmp;
-
- }       
-        
+						-rSinZmp,rCosZmp;      
 
 }
 
@@ -1365,15 +635,7 @@ void MPCSolver::computeOrientations() {
         ds_d = doubleSupportDuration;
 
 
- /*
-        if(Timing_Manager(0,1) = singlesupport){
-        ss_d = Timing_Manager(0,2);
-        ds_d = Timing_Manager(1,2);
-        } else {
-        ss_d = Timing_Manager(3,2);
-        ds_d = Timing_Manager(0,2);
-        }
-/**/
+
 
         if (widgetReference==false) {
             vRefX = v_x;
@@ -1451,8 +713,6 @@ void MPCSolver::computeOrientations() {
 
 void MPCSolver::genBalanceConstraint(){
 
-
-
 	AZmp.setZero();
 
         // Build constraint matrices for the QP
@@ -1473,7 +733,7 @@ void MPCSolver::genBalanceConstraint(){
 
 	bZmpMax =   bZmpLeftTerm - bZmpRightTerm;
 	bZmpMin = - bZmpLeftTerm - bZmpRightTerm;
-        // Add here constraint restriction if needed!
+
 }
 
 void MPCSolver::genFeasibilityConstraint(){
@@ -1524,6 +784,7 @@ void MPCSolver::genFeasibilityConstraint(){
 	bFootstepsMax <<  pF*deltaXMax, -pFl*deltaYIn  + pFr*deltaYOut;
 	bFootstepsMin << -pF*deltaXMax, -pFl*deltaYOut + pFr*deltaYIn;
 }
+
 
 Eigen::VectorXd MPCSolver::solveQP() {
 	int nVariables = costFunctionH.rows();
@@ -1578,15 +839,16 @@ Eigen::VectorXd MPCSolver::solveQP() {
 }
 
 Eigen::Vector3d MPCSolver::updateState(double zmpDot, int dim, double timeStep) {
-	// Update the state along the dim-th direction (0,1,2) = (x,y,z)
+    
+    // Update the state along the dim-th direction (0,1,2) = (x,y,z)
 
     double ch = cosh(omega*timeStep);
     double sh = sinh(omega*timeStep);
 
-	Eigen::Matrix3d A_upd = Eigen::MatrixXd::Zero(3,3);
-	Eigen::Vector3d B_upd = Eigen::VectorXd::Zero(3);
-	A_upd<<ch,sh/omega,1-ch,omega*sh,ch,-omega*sh,0,0,1;
-	B_upd<<timeStep-sh/omega,1-ch,timeStep;
+    Eigen::Matrix3d A_upd = Eigen::MatrixXd::Zero(3,3);
+    Eigen::Vector3d B_upd = Eigen::VectorXd::Zero(3);
+    A_upd<<ch,sh/omega,1-ch,omega*sh,ch,-omega*sh,0,0,1;
+    B_upd<<timeStep-sh/omega,1-ch,timeStep;
 
     Eigen::Vector3d currentState =
     	Eigen::Vector3d( comPos(dim),comVel(dim),zmpPos(dim));
