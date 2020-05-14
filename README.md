@@ -18,7 +18,7 @@ Clone the repository. Type from terminal:
 
      git clone https://github.com/FilippoSmald1/HRP-4-DART.git
 
-Decompress the the "Eigen.zip" and "qpOases.zip" folders.
+Decompress the the "Eigen.zip", "qpOases.zip", "urdf.zip" and "meshes.zip" folders.
 
 Open "main.cpp" and change the path 
 
